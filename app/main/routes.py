@@ -12,48 +12,61 @@ def dashboard():
     user_id = session['user_id']
     user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
 
-    # Obtenemos historial ordenado
-    weight_history = list(current_app.db.weight_entries.find(
-        {'user_id': user_id}
-    ).sort('recorded_date', pymongo.DESCENDING))
+    # 1. OPTIMIZACIÓN: Contar el total sin traer los documentos (muy rápido)
+    total_entries = current_app.db.weight_entries.count_documents({'user_id': user_id})
 
-    # Obtenemos altura del perfil (en cm)
+    # 2. OPTIMIZACIÓN: Traer solo 16 documentos (15 para mostrar + 1 para calcular la variación del #15)
+    # Esto asegura que la carga sea instantánea aunque haya 1 millón de registros.
+    cursor = current_app.db.weight_entries.find({'user_id': user_id}) \
+        .sort('recorded_date', pymongo.DESCENDING) \
+        .limit(16)
+
+    # Convertimos a lista solo estos 16 elementos
+    fetched_entries = list(cursor)
+
+    # 3. Procesamiento (Igual que antes, pero solo sobre la lista pequeña)
     profile = user.get('profile', {})
     height_cm = profile.get('height')
-
-    # Preparamos la altura en metros para la fórmula (evitar división por cero)
     height_m = (float(height_cm) / 100) if height_cm else None
 
-    # --- BUCLE ÚNICO: Calculamos Variación e IMC ---
-    for i in range(len(weight_history)):
-        entry = weight_history[i]  # Alias para escribir menos
+    for i in range(len(fetched_entries)):
+        entry = fetched_entries[i]
 
-        # 1. CÁLCULO DE VARIACIÓN (Lógica anterior)
-        if i < len(weight_history) - 1:
-            prev_entry = weight_history[i + 1]
+        # Cálculo de IMC (solo depende del propio registro)
+        if height_m:
+            entry['imc'] = round(entry['weight'] / (height_m ** 2), 1)
+        else:
+            entry['imc'] = None
+
+        # Cálculo de Variación (necesita al vecino siguiente)
+        # Si estamos en el índice 14 (el elemento 15), miramos el índice 15 (el elemento 16)
+        if i < len(fetched_entries) - 1:
+            prev_entry = fetched_entries[i + 1]
             entry['variation'] = round(entry['weight'] - prev_entry['weight'], 1)
         else:
+            # Si estamos en el último elemento traído (sea el 16 o menos si hay pocos datos)
+            # no podemos calcular variación hacia atrás.
             entry['variation'] = None
 
-        # 2. CÁLCULO DE IMC (Nueva lógica)
-        if height_m:
-            bmi = entry['weight'] / (height_m ** 2)
-            entry['imc'] = round(bmi, 1)
-        else:
-            entry['imc'] = None  # Si no hay altura, no hay IMC
+    # 4. Datos Finales para la Vista
+    # El peso actual es el más reciente
+    current_weight = fetched_entries[0]['weight'] if fetched_entries else None
 
-    current_weight = weight_history[0]['weight'] if weight_history else None
-
-    # --- NUEVO: Calcular IMC actual para la barra visual ---
+    # IMC actual para la barra visual
     current_bmi = None
     if current_weight and height_m:
         current_bmi = round(current_weight / (height_m ** 2), 1)
 
+    # 5. RECORTE FINAL: Enviamos solo los primeros 15 a la tabla
+    # El elemento 16 (si existe) se usó solo para el cálculo y aquí se descarta visualmente.
+    display_history = fetched_entries[:15]
+
     return render_template('main/dashboard.html',
                            user=user,
                            current_weight=current_weight,
-                           current_bmi=current_bmi,  # <--- Enviamos este dato nuevo
-                           weight_history=weight_history)
+                           current_bmi=current_bmi,
+                           weight_history=display_history,  # Lista de máximo 15 items
+                           total_entries=total_entries)  # Total real (ej: 100, 500) para el botón
 
 @main_bp.route('/')
 def index():
@@ -155,3 +168,39 @@ def delete_weight(entry_id):
     )
     flash('Registro eliminado.', 'warning')
     return redirect(url_for('main.dashboard'))
+
+
+# --- RUTA FALTANTE: HISTORIAL COMPLETO ---
+@main_bp.route('/history')
+@login_required
+def full_history():
+    user_id = session['user_id']
+    user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
+
+    # 1. Traer TODO el historial sin límite
+    full_history = list(current_app.db.weight_entries.find(
+        {'user_id': user_id}
+    ).sort('recorded_date', pymongo.DESCENDING))
+
+    # 2. Cálculos (Variación e IMC) para la tabla completa
+    profile = user.get('profile', {})
+    height_cm = profile.get('height')
+    height_m = (float(height_cm) / 100) if height_cm else None
+
+    for i in range(len(full_history)):
+        entry = full_history[i]
+
+        # Variación
+        if i < len(full_history) - 1:
+            entry['variation'] = round(entry['weight'] - full_history[i + 1]['weight'], 1)
+        else:
+            entry['variation'] = None
+
+        # IMC
+        if height_m:
+            entry['imc'] = round(entry['weight'] / (height_m ** 2), 1)
+        else:
+            entry['imc'] = None
+
+    # 3. Renderizar la plantilla específica del historial
+    return render_template('main/history.html', weight_history=full_history)
