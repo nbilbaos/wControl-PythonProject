@@ -77,6 +77,133 @@
   </div>
 </div>
 
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-white">
+        <h4 class="mb-0">Historial de Peso</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Peso (kg)</th>
+                        <th>Variación</th>
+                        <th>IMC</th> <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in weight_history %}
+                    <tr>
+                        <td>{{ entry.recorded_date.strftime('%d-%m-%Y') }}</td>
+                        <td><strong>{{ entry.weight }}</strong></td>
+
+                        <td>
+                            {% if entry.variation is not none %}
+                                {% if entry.variation < 0 %}
+                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold"><i class="bi bi-arrow-down"></i> {{ entry.variation }} kg</span>
+                                {% elif entry.variation > 0 %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold"><i class="bi bi-arrow-up"></i> +{{ entry.variation }} kg</span>
+                                {% else %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold"><i class="bi bi-dash"></i> 0 kg</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted small">Primer registro</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if entry.imc %}
+                                {% if entry.imc < 18.5 %}
+                                    <span class="badge rounded-pill bg-info text-dark" title="Bajo Peso">{{ entry.imc }}</span>
+                                {% elif entry.imc < 25 %}
+                                    <span class="badge rounded-pill bg-success" title="Peso Normal">{{ entry.imc }}</span>
+                                {% elif entry.imc < 30 %}
+                                    <span class="badge rounded-pill bg-warning text-dark" title="Sobrepeso">{{ entry.imc }}</span>
+                                {% else %}
+                                    <span class="badge rounded-pill bg-danger" title="Obesidad">{{ entry.imc }}</span>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ url_for('main.profile') }}" class="text-decoration-none small text-muted">
+                                    <i class="bi bi-exclamation-circle"></i> Falta altura
+                                </a>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editWeightModal"
+                                    data-id="{{ entry._id }}"
+                                    data-weight="{{ entry.weight }}"
+                                    data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteWeightModal"
+                                    data-id="{{ entry._id }}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editWeightModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Registro</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="editForm" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">Peso (kg)</label>
+                <input type="number" step="0.1" class="form-control" name="weight" id="editWeightInput" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" name="date" id="editDateInput" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteWeightModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este registro de peso?</p>
+        <p class="text-muted small">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="deleteForm" method="POST">
+            <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {
         // Obtener la fecha de hoy en formato YYYY-MM-DD
@@ -85,6 +212,39 @@
         document.getElementById('dateInput').value = today;
     });
 </script>
+<script>
+    // 1. Lógica para el Modal de EDITAR
+    var editModal = document.getElementById('editWeightModal')
+    editModal.addEventListener('show.bs.modal', function (event) {
+        // Botón que activó el modal
+        var button = event.relatedTarget
+        // Extraer info de los atributos data-*
+        var id = button.getAttribute('data-id')
+        var weight = button.getAttribute('data-weight')
+        var date = button.getAttribute('data-date')
 
+        // Actualizar los inputs del modal
+        var modalBodyInputWeight = editModal.querySelector('#editWeightInput')
+        var modalBodyInputDate = editModal.querySelector('#editDateInput')
+        var editForm = editModal.querySelector('#editForm')
+
+        modalBodyInputWeight.value = weight
+        modalBodyInputDate.value = date
+
+        // Actualizar la URL del formulario (Action)
+        editForm.action = "/edit_weight/" + id
+    })
+
+    // 2. Lógica para el Modal de ELIMINAR
+    var deleteModal = document.getElementById('deleteWeightModal')
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        var id = button.getAttribute('data-id')
+        var deleteForm = deleteModal.querySelector('#deleteForm')
+
+        // Actualizar la URL del formulario
+        deleteForm.action = "/delete_weight/" + id
+    })
+</script>
 
 {% endblock %}

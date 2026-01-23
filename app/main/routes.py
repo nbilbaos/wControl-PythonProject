@@ -10,23 +10,44 @@ main_bp = Blueprint('main', __name__)
 @login_required
 def dashboard():
     user_id = session['user_id']
-
-    # 1. Obtener datos del usuario (Nombre, Altura, etc.)
     user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
 
-    # 2. Obtener el registro de peso MÁS RECIENTE
-    # Buscamos en weight_entries, filtramos por usuario, ordenamos descendente por fecha y tomamos 1.
-    latest_weight_entry = current_app.db.weight_entries.find_one(
-        {'user_id': user_id},
-        sort=[('recorded_date', pymongo.DESCENDING)]
-    )
+    # Obtenemos historial ordenado
+    weight_history = list(current_app.db.weight_entries.find(
+        {'user_id': user_id}
+    ).sort('recorded_date', pymongo.DESCENDING))
 
-    # Si encontramos un registro, ese es el peso actual. Si no, es None.
-    current_weight = latest_weight_entry['weight'] if latest_weight_entry else None
+    # Obtenemos altura del perfil (en cm)
+    profile = user.get('profile', {})
+    height_cm = profile.get('height')
+
+    # Preparamos la altura en metros para la fórmula (evitar división por cero)
+    height_m = (float(height_cm) / 100) if height_cm else None
+
+    # --- BUCLE ÚNICO: Calculamos Variación e IMC ---
+    for i in range(len(weight_history)):
+        entry = weight_history[i]  # Alias para escribir menos
+
+        # 1. CÁLCULO DE VARIACIÓN (Lógica anterior)
+        if i < len(weight_history) - 1:
+            prev_entry = weight_history[i + 1]
+            entry['variation'] = round(entry['weight'] - prev_entry['weight'], 1)
+        else:
+            entry['variation'] = None
+
+        # 2. CÁLCULO DE IMC (Nueva lógica)
+        if height_m:
+            bmi = entry['weight'] / (height_m ** 2)
+            entry['imc'] = round(bmi, 1)
+        else:
+            entry['imc'] = None  # Si no hay altura, no hay IMC
+
+    current_weight = weight_history[0]['weight'] if weight_history else None
 
     return render_template('main/dashboard.html',
                            user=user,
-                           current_weight=current_weight)
+                           current_weight=current_weight,
+                           weight_history=weight_history)
 
 @main_bp.route('/')
 def index():
@@ -95,4 +116,36 @@ def add_weight_entry():
     )
 
     flash('Peso registrado exitosamente.', 'success')
+    return redirect(url_for('main.dashboard'))
+
+
+# --- RUTA PARA EDITAR ---
+@main_bp.route('/edit_weight/<entry_id>', methods=['POST'])
+@login_required
+def edit_weight(entry_id):
+    # Recibimos los nuevos datos
+    new_weight = float(request.form.get('weight'))
+    new_date_str = request.form.get('date')
+    new_date = datetime.strptime(new_date_str, '%Y-%m-%d')
+
+    # Actualizamos en MongoDB
+    current_app.db.weight_entries.update_one(
+        {'_id': ObjectId(entry_id), 'user_id': session['user_id']},  # Seguridad: verificar que pertenezca al usuario
+        {'$set': {
+            'weight': new_weight,
+            'recorded_date': new_date
+        }}
+    )
+
+    flash('Registro actualizado correctamente.', 'success')
+    return redirect(url_for('main.dashboard'))
+
+# --- RUTA PARA ELIMINAR ---
+@main_bp.route('/delete_weight/<entry_id>', methods=['POST'])
+@login_required
+def delete_weight(entry_id):
+    current_app.db.weight_entries.delete_one(
+        {'_id': ObjectId(entry_id), 'user_id': session['user_id']}
+    )
+    flash('Registro eliminado.', 'warning')
     return redirect(url_for('main.dashboard'))
