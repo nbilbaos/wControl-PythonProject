@@ -111,17 +111,43 @@
                                 <span class="text-muted small">Primer registro</span>
                             {% endif %}
                         </td>
-
                         <td>
                             {% if entry.imc %}
                                 {% if entry.imc < 18.5 %}
-                                    <span class="badge rounded-pill bg-info text-dark" title="Bajo Peso">{{ entry.imc }}</span>
+                                    <span class="badge rounded-pill border"
+                                          style="background-color: #d6eaff; color: #000;">
+                                        {{ entry.imc }}
+                                    </span>
+
                                 {% elif entry.imc < 25 %}
-                                    <span class="badge rounded-pill bg-success" title="Peso Normal">{{ entry.imc }}</span>
+                                    <span class="badge rounded-pill border"
+                                          style="background-color: #aadd77; color: #004d00;">
+                                        {{ entry.imc }}
+                                    </span>
+
                                 {% elif entry.imc < 30 %}
-                                    <span class="badge rounded-pill bg-warning text-dark" title="Sobrepeso">{{ entry.imc }}</span>
+                                    <span class="badge rounded-pill border"
+                                          style="background-color: #ffdd55; color: #554400;">
+                                        {{ entry.imc }}
+                                    </span>
+
+                                {% elif entry.imc < 35 %}
+                                    <span class="badge rounded-pill border"
+                                          style="background-color: #ffaa00; color: #000;">
+                                        {{ entry.imc }}
+                                    </span>
+
+                                {% elif entry.imc < 40 %}
+                                    <span class="badge rounded-pill border"
+                                          style="background-color: #ff6600; color: #fff;">
+                                        {{ entry.imc }}
+                                    </span>
+
                                 {% else %}
-                                    <span class="badge rounded-pill bg-danger" title="Obesidad">{{ entry.imc }}</span>
+                                    <span class="badge rounded-pill border"
+                                          style="background-color: #dc3545; color: #fff;">
+                                        {{ entry.imc }}
+                                    </span>
                                 {% endif %}
                             {% else %}
                                 <a href="{{ url_for('main.profile') }}" class="text-decoration-none small text-muted">
@@ -137,13 +163,13 @@
                                     data-id="{{ entry._id }}"
                                     data-weight="{{ entry.weight }}"
                                     data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
-                                <i class="bi bi-pencil"></i>
+                                <i class="bi bi-pencil"></i> Editar
                             </button>
                             <button class="btn btn-sm btn-outline-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#deleteWeightModal"
                                     data-id="{{ entry._id }}">
-                                <i class="bi bi-trash"></i>
+                                <i class="bi bi-trash"></i> Eliminar
                             </button>
                         </td>
                     </tr>
@@ -203,6 +229,88 @@
   </div>
 </div>
 
+<div class="card shadow-sm mt-4 mb-5">
+    <div class="card-body">
+        <h5 class="card-title fw-bold">¿Qué es el IMC?</h5>
+        <p class="text-muted">
+            El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable para su estatura.
+            Se calcula dividiendo el peso en kilogramos por la estatura (metros) al cuadrado.
+        </p>
+
+        <h6 class="mt-4 mb-3 fw-bold">Clasificación según la OMS:</h6>
+
+       <div class="row g-0 text-center text-white small fw-bold mt-3" style="min-height: 90px;">
+
+    <div class="col d-flex flex-column justify-content-center position-relative
+                {% if current_bmi and current_bmi < 18.5 %} border border-3 border-dark shadow scale-up {% endif %}"
+         style="background-color: #d6eaff; color: #000 !important; transition: all 0.3s;">
+        <span>&lt; 18.5</span>
+        <span>Bajo Peso</span>
+        {% if current_bmi and current_bmi < 18.5 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+        {% endif %}
+    </div>
+
+    <div class="col d-flex flex-column justify-content-center position-relative
+                {% if current_bmi and 18.5 <= current_bmi < 25 %} border border-3 border-dark shadow scale-up {% endif %}"
+         style="background-color: #aadd77; color: #004d00 !important; transition: all 0.3s;">
+        <span>18.5 - 24.9</span>
+        <span>Normal</span>
+        {% if current_bmi and 18.5 <= current_bmi < 25 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+        {% endif %}
+    </div>
+
+    <div class="col d-flex flex-column justify-content-center position-relative
+                {% if current_bmi and 25 <= current_bmi < 30 %} border border-3 border-dark shadow scale-up {% endif %}"
+         style="background-color: #ffdd55; color: #554400 !important; transition: all 0.3s;">
+        <span>25.0 - 29.9</span>
+        <span>Sobrepeso</span>
+        {% if current_bmi and 25 <= current_bmi < 30 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+        {% endif %}
+    </div>
+
+    <div class="col d-flex flex-column justify-content-center position-relative
+                {% if current_bmi and 30 <= current_bmi < 35 %} border border-3 border-dark shadow scale-up {% endif %}"
+         style="background-color: #ffaa00; transition: all 0.3s;">
+        <span>30.0 - 34.9</span>
+        <span>Obesidad I</span>
+        {% if current_bmi and 30 <= current_bmi < 35 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+        {% endif %}
+    </div>
+
+    <div class="col d-flex flex-column justify-content-center position-relative
+                {% if current_bmi and 35 <= current_bmi < 40 %} border border-3 border-dark shadow scale-up {% endif %}"
+         style="background-color: #ff6600; transition: all 0.3s;">
+        <span>35.0 - 39.9</span>
+        <span>Obesidad II</span>
+        {% if current_bmi and 35 <= current_bmi < 40 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+        {% endif %}
+    </div>
+
+    <div class="col d-flex flex-column justify-content-center position-relative
+                {% if current_bmi and current_bmi >= 40 %} border border-3 border-dark shadow scale-up {% endif %}"
+         style="background-color: #dc3545; transition: all 0.3s;">
+        <span>&ge; 40</span>
+        <span>Obesidad III</span>
+        {% if current_bmi and current_bmi >= 40 %}
+            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+        {% endif %}
+    </div>
+    <div class="mt-2 text-muted small fst-italic">
+            <i class="bi bi-info-circle"></i> Nota: El IMC es una referencia general y puede no ser exacto para atletas o personas con mucha masa muscular.
+    </div>
+
+</div>
+<style>
+    .scale-up {
+        transform: scale(1.05);
+        z-index: 10; /* Para que sobresalga por encima de los otros */
+    }
+</style>
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {

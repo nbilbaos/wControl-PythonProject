@@ -44,9 +44,15 @@ def dashboard():
 
     current_weight = weight_history[0]['weight'] if weight_history else None
 
+    # --- NUEVO: Calcular IMC actual para la barra visual ---
+    current_bmi = None
+    if current_weight and height_m:
+        current_bmi = round(current_weight / (height_m ** 2), 1)
+
     return render_template('main/dashboard.html',
                            user=user,
                            current_weight=current_weight,
+                           current_bmi=current_bmi,  # <--- Enviamos este dato nuevo
                            weight_history=weight_history)
 
 @main_bp.route('/')
