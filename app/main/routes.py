@@ -19,7 +19,7 @@ def dashboard():
     # 2. Obtenemos historial (Limitado a 15 para la tabla)
     cursor = current_app.db.weight_entries.find({'user_id': user_id}) \
         .sort('recorded_date', pymongo.DESCENDING) \
-        .limit(15)
+        .limit(11)
     fetched_entries = list(cursor)
 
     # 3. Procesamos IMC y Variación (Igual que antes)
@@ -65,11 +65,13 @@ def dashboard():
     dates_labels = [entry['recorded_date'].strftime('%d/%m') for entry in chart_data]
     weights_data = [entry['weight'] for entry in chart_data]
 
+    display_history = fetched_entries[:10]
+
     return render_template('main/dashboard.html',
                            user=user,
                            current_weight=current_weight,
                            current_bmi=current_bmi,
-                           weight_history=fetched_entries,
+                           weight_history=display_history,
                            total_entries=total_entries,
                            # Nuevas variables enviadas:
                            total_change=total_change,

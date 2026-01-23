@@ -138,10 +138,11 @@
                     <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
                 {% endif %}
             </div>
+            <div class="mt-2 text-muted small fst-italic">
+                <i class="bi bi-info-circle"></i> Nota: El IMC es una referencia general y puede no ser exacto para atletas o personas con mucha masa muscular.
+            </div>
         </div>
-        <div class="mt-2 text-muted small fst-italic">
-            <i class="bi bi-info-circle"></i> Nota: El IMC es una referencia general y puede no ser exacto para atletas o personas con mucha masa muscular.
-        </div>
+
     </div>
     <style>
         .scale-up {
@@ -211,15 +212,94 @@
         </table>
     </div>
 
-    {% if total_entries > 15 %}
-    <div class="card-footer bg-white text-center py-3">
-        <a href="{{ url_for('main.full_history') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
-            Ver historial completo
-        </a>
+    {% if total_entries > 10 %}
+    <div class="text-center mt-3 border-top pt-3">
+        <p class="text-muted small mb-2">Mostrando los últimos 10 registros de un total de {{ total_entries }}.</p>
+            <a href="{{ url_for('main.full_history') }}" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="bi bi-journal-text"></i> Ver Historial Completo
+            </a>
     </div>
     {% endif %}
 </div>
 
+<div class="modal fade" id="editWeightModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" >
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Editar Registro</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="editForm" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">Peso (kg)</label>
+                <input type="number" step="0.1" class="form-control" name="weight" id="editWeightInput" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Fecha</label>
+                <input type="date" class="form-control" name="date" id="editDateInput" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteWeightModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro de que deseas eliminar este registro de peso?</p>
+        <p class="text-muted small">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="deleteForm" method="POST">
+            <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="weightModal" tabindex="-1" aria-labelledby="weightModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"> <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="weightModalLabel">Nuevo Registro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form action="{{ url_for('main.add_weight_entry') }}" method="POST">
+          <div class="modal-body">
+
+            <div class="mb-3">
+                <label for="weightInput" class="form-label">Peso (kg)</label>
+                <input type="number" step="0.1" class="form-control form-control-lg" name="weight" id="weightInput" placeholder="Ej: 75.5" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="dateInput" class="form-label">Fecha del registro</label>
+                <input type="date" class="form-control" name="date" id="dateInput" required>
+                <div class="form-text">Puedes cambiar la fecha si es un registro pasado.</div>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Registro</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
 <script>
     const ctx = document.getElementById('weightChart').getContext('2d');
 
@@ -262,5 +342,46 @@
         }
     });
 </script>
+<script>
+    // 1. Lógica para el Modal de EDITAR
+    var editModal = document.getElementById('editWeightModal')
+    editModal.addEventListener('show.bs.modal', function (event) {
+        // Botón que activó el modal
+        var button = event.relatedTarget
+        // Extraer info de los atributos data-*
+        var id = button.getAttribute('data-id')
+        var weight = button.getAttribute('data-weight')
+        var date = button.getAttribute('data-date')
 
+        // Actualizar los inputs del modal
+        var modalBodyInputWeight = editModal.querySelector('#editWeightInput')
+        var modalBodyInputDate = editModal.querySelector('#editDateInput')
+        var editForm = editModal.querySelector('#editForm')
+
+        modalBodyInputWeight.value = weight
+        modalBodyInputDate.value = date
+
+        // Actualizar la URL del formulario (Action)
+        editForm.action = "/edit_weight/" + id
+    })
+
+    // 2. Lógica para el Modal de ELIMINAR
+    var deleteModal = document.getElementById('deleteWeightModal')
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        var id = button.getAttribute('data-id')
+        var deleteForm = deleteModal.querySelector('#deleteForm')
+
+        // Actualizar la URL del formulario
+        deleteForm.action = "/delete_weight/" + id
+    })
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        // Obtener la fecha de hoy en formato YYYY-MM-DD
+        const today = new Date().toISOString().split('T')[0];
+        // Asignarla al input
+        document.getElementById('dateInput').value = today;
+    });
+</script>
 {% endblock %}
