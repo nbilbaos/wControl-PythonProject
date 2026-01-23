@@ -1,242 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
-            <div class="container-fluid py-2">
-                <h1 class="display-5 fw-bold">Hola, {{ user_email }}</h1>
-                <p class="col-md-8 fs-4">Bienvenido a tu panel de control.</p>
-                    <strong>
-                        {% if current_weight %}
-                            {{ current_weight }} kg
-                        {% else %}
-                            Sin registros
-                        {% endif %}
-                    </strong>
-                </p>
-                <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#weightModal">
-                    <i class="bi bi-plus-circle"></i> Registrar Nuevo Peso
-                </button>
 
-                <button class="btn btn-primary btn-lg" type="button">Nueva Tarea</button>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">Hola, {{ user.name }}</h2>
+        <p class="text-muted small mb-0">Resumen de tu progreso</p>
     </div>
+    <button class="btn btn-primary shadow-sm px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#weightModal">
+        <i class="bi bi-plus-lg"></i> Registrar Peso
+    </button>
 </div>
 
-<div class="row align-items-md-stretch">
-    <div class="col-md-6 mb-4">
-        <div class="h-100 p-5 text-white bg-dark rounded-3 shadow">
-            <h2>Mi información</h2>
-            <p>Gestiona la información como; peso, altura, etc...</p>
-            <a href="{{ url_for('main.profile') }}">
-              <button type="button" class="btn btn-outline-light">Haz clic aquí</button>
-            </a>
+<div class="row g-3 mb-4">
 
-        </div>
-    </div>
-    
-    <div class="col-md-6 mb-4">
-        <div class="h-100 p-5 bg-light border rounded-3 shadow-sm">
-            <h2>Mis Proyectos</h2>
-            <p>Aquí cargaremos la lista de tus proyectos o documentos guardados.</p>
-            <button class="btn btn-outline-secondary" type="button">Ver Proyectos</button>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="weightModal" tabindex="-1" aria-labelledby="weightModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered"> <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="weightModalLabel">Nuevo Registro</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <form action="{{ url_for('main.add_weight_entry') }}" method="POST">
-          <div class="modal-body">
-
-            <div class="mb-3">
-                <label for="weightInput" class="form-label">Peso (kg)</label>
-                <input type="number" step="0.1" class="form-control form-control-lg" name="weight" id="weightInput" placeholder="Ej: 75.5" required>
-            </div>
-
-            <div class="mb-3">
-                <label for="dateInput" class="form-label">Fecha del registro</label>
-                <input type="date" class="form-control" name="date" id="dateInput" required>
-                <div class="form-text">Puedes cambiar la fecha si es un registro pasado.</div>
-            </div>
-
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Registro</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="card shadow-sm mt-4">
-    <div class="card-header bg-white">
-        <h4 class="mb-0">Historial de Peso</h4>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Peso (kg)</th>
-                        <th>Variación</th>
-                        <th>IMC</th> <th class="text-end">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in weight_history %}
-                    <tr>
-                        <td>{{ entry.recorded_date.strftime('%d-%m-%Y') }}</td>
-                        <td><strong>{{ entry.weight }}</strong></td>
-
-                        <td>
-                            {% if entry.variation is not none %}
-                                {% if entry.variation < 0 %}
-                                    <span class="badge bg-success bg-opacity-10 text-success fw-bold"><i class="bi bi-arrow-down"></i> {{ entry.variation }} kg</span>
-                                {% elif entry.variation > 0 %}
-                                    <span class="badge bg-danger bg-opacity-10 text-danger fw-bold"><i class="bi bi-arrow-up"></i> +{{ entry.variation }} kg</span>
-                                {% else %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold"><i class="bi bi-dash"></i> 0 kg</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="text-muted small">Primer registro</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if entry.imc %}
-                                {% if entry.imc < 18.5 %}
-                                    <span class="badge rounded-pill border"
-                                          style="background-color: #d6eaff; color: #000;">
-                                        {{ entry.imc }}
-                                    </span>
-
-                                {% elif entry.imc < 25 %}
-                                    <span class="badge rounded-pill border"
-                                          style="background-color: #aadd77; color: #004d00;">
-                                        {{ entry.imc }}
-                                    </span>
-
-                                {% elif entry.imc < 30 %}
-                                    <span class="badge rounded-pill border"
-                                          style="background-color: #ffdd55; color: #554400;">
-                                        {{ entry.imc }}
-                                    </span>
-
-                                {% elif entry.imc < 35 %}
-                                    <span class="badge rounded-pill border"
-                                          style="background-color: #ffaa00; color: #000;">
-                                        {{ entry.imc }}
-                                    </span>
-
-                                {% elif entry.imc < 40 %}
-                                    <span class="badge rounded-pill border"
-                                          style="background-color: #ff6600; color: #fff;">
-                                        {{ entry.imc }}
-                                    </span>
-
-                                {% else %}
-                                    <span class="badge rounded-pill border"
-                                          style="background-color: #dc3545; color: #fff;">
-                                        {{ entry.imc }}
-                                    </span>
-                                {% endif %}
-                            {% else %}
-                                <a href="{{ url_for('main.profile') }}" class="text-decoration-none small text-muted">
-                                    <i class="bi bi-exclamation-circle"></i> Falta altura
-                                </a>
-                            {% endif %}
-                        </td>
-
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-primary me-1"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editWeightModal"
-                                    data-id="{{ entry._id }}"
-                                    data-weight="{{ entry.weight }}"
-                                    data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
-                                <i class="bi bi-pencil"></i> Editar
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#deleteWeightModal"
-                                    data-id="{{ entry._id }}">
-                                <i class="bi bi-trash"></i> Eliminar
-                            </button>
-                        </td>
-                    </tr>
-                    {% else %}
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% if total_entries > 15 %}
-                <div class="text-center mt-3 border-top pt-3">
-                    <p class="text-muted small mb-2">Mostrando los últimos 15 registros de un total de {{ total_entries }}.</p>
-                    <a href="{{ url_for('main.full_history') }}" class="btn btn-outline-primary">
-                        <i class="bi bi-journal-text"></i> Ver Historial Completo
-                    </a>
+    <div class="col-md-4">
+        <div class="card h-100 p-3 bg-white">
+            <div class="d-flex align-items-center mb-2">
+                <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
+                    <i class="bi bi-speedometer2 fs-4"></i>
                 </div>
-            {% endif %}
+                <span class="text-muted text-uppercase fw-bold small">Peso Actual</span>
+            </div>
+            <h1 class="fw-bold mb-0">{{ current_weight }} <span class="fs-5 text-muted fw-normal">kg</span></h1>
+        </div>
+    </div>
 
+    {% set bmi_color = 'bg-light text-dark' %}
+    {% if current_bmi %}
+        {% if current_bmi < 18.5 %}{% set bmi_color = 'bg-info bg-opacity-10 text-info' %}{% endif %}
+        {% if current_bmi >= 18.5 and current_bmi < 25 %}{% set bmi_color = 'bg-success bg-opacity-10 text-success' %}{% endif %}
+        {% if current_bmi >= 25 and current_bmi < 30 %}{% set bmi_color = 'bg-warning bg-opacity-10 text-warning' %}{% endif %}
+        {% if current_bmi >= 30 %}{% set bmi_color = 'bg-danger bg-opacity-10 text-danger' %}{% endif %}
+    {% endif %}
 
+    <div class="col-md-4">
+        <div class="card h-100 p-3 {{ bmi_color }}">
+            <div class="d-flex align-items-center mb-2">
+                <div class="bg-white bg-opacity-50 p-2 rounded-3 me-3">
+                    <i class="bi bi-heart-pulse fs-4"></i>
+                </div>
+                <span class="text-uppercase fw-bold small opacity-75">IMC Actual</span>
+            </div>
+            <h1 class="fw-bold mb-0">{{ current_bmi }}</h1>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 p-3 bg-white">
+            <div class="d-flex align-items-center mb-2">
+                <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3">
+                    <i class="bi bi-graph-up-arrow fs-4"></i>
+                </div>
+                <span class="text-muted text-uppercase fw-bold small">Progreso Total</span>
+            </div>
+            <h1 class="fw-bold mb-0 {% if total_change > 0 %}text-danger{% else %}text-success{% endif %}">
+                {% if total_change > 0 %}+{% endif %}{{ total_change }} <span class="fs-5 text-muted fw-normal">kg</span>
+            </h1>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="editWeightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Editar Registro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form id="editForm" method="POST">
-          <div class="modal-body">
-            <div class="mb-3">
-                <label class="form-label">Peso (kg)</label>
-                <input type="number" step="0.1" class="form-control" name="weight" id="editWeightInput" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" name="date" id="editDateInput" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-          </div>
-      </form>
+<div class="card mb-4 p-4">
+    <h5 class="fw-bold mb-3">Tendencia de Peso (Últimos registros)</h5>
+    <div style="height: 300px;">
+        <canvas id="weightChart"></canvas>
     </div>
-  </div>
-</div>
-
-<div class="modal fade" id="deleteWeightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Confirmar Eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar este registro de peso?</p>
-        <p class="text-muted small">Esta acción no se puede deshacer.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <form id="deleteForm" method="POST">
-            <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
-        </form>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="card shadow-sm mt-4 mb-5">
@@ -244,125 +73,194 @@
         <h5 class="card-title fw-bold">¿Qué es el IMC?</h5>
         <p class="text-muted">
             El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable para su estatura.
-            Se calcula dividiendo el peso en kilogramos por la estatura (metros) al cuadrado.
+            Se calcula dividiendo el peso en kilogramos por la estatura en metros al cuadrado.
         </p>
 
         <h6 class="mt-4 mb-3 fw-bold">Clasificación según la OMS:</h6>
+        <div class="row g-0 text-center text-white small fw-bold mt-3" style="min-height: 90px;">
 
-       <div class="row g-0 text-center text-white small fw-bold mt-3" style="min-height: 90px;">
+            <div class="col d-flex flex-column justify-content-center position-relative
+                        {% if current_bmi and current_bmi < 18.5 %} border border-3 border-dark shadow scale-up {% endif %}"
+                 style="background-color: #d6eaff; color: #000 !important; transition: all 0.3s;">
+                <span>&lt; 18.5</span>
+                <span>Bajo Peso</span>
+                {% if current_bmi and current_bmi < 18.5 %}
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                {% endif %}
+            </div>
 
-    <div class="col d-flex flex-column justify-content-center position-relative
-                {% if current_bmi and current_bmi < 18.5 %} border border-3 border-dark shadow scale-up {% endif %}"
-         style="background-color: #d6eaff; color: #000 !important; transition: all 0.3s;">
-        <span>&lt; 18.5</span>
-        <span>Bajo Peso</span>
-        {% if current_bmi and current_bmi < 18.5 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-        {% endif %}
-    </div>
+            <div class="col d-flex flex-column justify-content-center position-relative
+                        {% if current_bmi and 18.5 <= current_bmi < 25 %} border border-3 border-dark shadow scale-up {% endif %}"
+                 style="background-color: #aadd77; color: #004d00 !important; transition: all 0.3s;">
+                <span>18.5 - 24.9</span>
+                <span>Normal</span>
+                {% if current_bmi and 18.5 <= current_bmi < 25 %}
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                {% endif %}
+            </div>
 
-    <div class="col d-flex flex-column justify-content-center position-relative
-                {% if current_bmi and 18.5 <= current_bmi < 25 %} border border-3 border-dark shadow scale-up {% endif %}"
-         style="background-color: #aadd77; color: #004d00 !important; transition: all 0.3s;">
-        <span>18.5 - 24.9</span>
-        <span>Normal</span>
-        {% if current_bmi and 18.5 <= current_bmi < 25 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-        {% endif %}
-    </div>
+            <div class="col d-flex flex-column justify-content-center position-relative
+                        {% if current_bmi and 25 <= current_bmi < 30 %} border border-3 border-dark shadow scale-up {% endif %}"
+                 style="background-color: #ffdd55; color: #554400 !important; transition: all 0.3s;">
+                <span>25.0 - 29.9</span>
+                <span>Sobrepeso</span>
+                {% if current_bmi and 25 <= current_bmi < 30 %}
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                {% endif %}
+            </div>
 
-    <div class="col d-flex flex-column justify-content-center position-relative
-                {% if current_bmi and 25 <= current_bmi < 30 %} border border-3 border-dark shadow scale-up {% endif %}"
-         style="background-color: #ffdd55; color: #554400 !important; transition: all 0.3s;">
-        <span>25.0 - 29.9</span>
-        <span>Sobrepeso</span>
-        {% if current_bmi and 25 <= current_bmi < 30 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-        {% endif %}
-    </div>
+            <div class="col d-flex flex-column justify-content-center position-relative
+                        {% if current_bmi and 30 <= current_bmi < 35 %} border border-3 border-dark shadow scale-up {% endif %}"
+                 style="background-color: #ffaa00; transition: all 0.3s;">
+                <span>30.0 - 34.9</span>
+                <span>Obesidad I</span>
+                {% if current_bmi and 30 <= current_bmi < 35 %}
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                {% endif %}
+            </div>
 
-    <div class="col d-flex flex-column justify-content-center position-relative
-                {% if current_bmi and 30 <= current_bmi < 35 %} border border-3 border-dark shadow scale-up {% endif %}"
-         style="background-color: #ffaa00; transition: all 0.3s;">
-        <span>30.0 - 34.9</span>
-        <span>Obesidad I</span>
-        {% if current_bmi and 30 <= current_bmi < 35 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-        {% endif %}
-    </div>
+            <div class="col d-flex flex-column justify-content-center position-relative
+                        {% if current_bmi and 35 <= current_bmi < 40 %} border border-3 border-dark shadow scale-up {% endif %}"
+                 style="background-color: #ff6600; transition: all 0.3s;">
+                <span>35.0 - 39.9</span>
+                <span>Obesidad II</span>
+                {% if current_bmi and 35 <= current_bmi < 40 %}
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                {% endif %}
+            </div>
 
-    <div class="col d-flex flex-column justify-content-center position-relative
-                {% if current_bmi and 35 <= current_bmi < 40 %} border border-3 border-dark shadow scale-up {% endif %}"
-         style="background-color: #ff6600; transition: all 0.3s;">
-        <span>35.0 - 39.9</span>
-        <span>Obesidad II</span>
-        {% if current_bmi and 35 <= current_bmi < 40 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-        {% endif %}
-    </div>
-
-    <div class="col d-flex flex-column justify-content-center position-relative
-                {% if current_bmi and current_bmi >= 40 %} border border-3 border-dark shadow scale-up {% endif %}"
-         style="background-color: #dc3545; transition: all 0.3s;">
-        <span>&ge; 40</span>
-        <span>Obesidad III</span>
-        {% if current_bmi and current_bmi >= 40 %}
-            <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-        {% endif %}
-    </div>
-    <div class="mt-2 text-muted small fst-italic">
+            <div class="col d-flex flex-column justify-content-center position-relative
+                        {% if current_bmi and current_bmi >= 40 %} border border-3 border-dark shadow scale-up {% endif %}"
+                 style="background-color: #dc3545; transition: all 0.3s;">
+                <span>&ge; 40</span>
+                <span>Obesidad III</span>
+                {% if current_bmi and current_bmi >= 40 %}
+                    <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="mt-2 text-muted small fst-italic">
             <i class="bi bi-info-circle"></i> Nota: El IMC es una referencia general y puede no ser exacto para atletas o personas con mucha masa muscular.
+        </div>
     </div>
+    <style>
+        .scale-up {
+            transform: scale(1.05);
+            z-index: 10; /* Para que sobresalga por encima de los otros */
+        }
+    </style>
 
 </div>
-<style>
-    .scale-up {
-        transform: scale(1.05);
-        z-index: 10; /* Para que sobresalga por encima de los otros */
-    }
-</style>
+
+<div class="card mb-4 overflow-hidden">
+    <div class="card-header bg-white py-3">
+        <h5 class="fw-bold mb-0">Historial Reciente</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Fecha</th>
+                    <th>Peso</th>
+                    <th>Variación</th>
+                    <th>IMC</th>
+                    <th class="text-end pe-4">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in weight_history %}
+                <tr>
+                    <td class="ps-4">{{ entry.recorded_date.strftime('%d-%m-%Y') }}</td>
+                    <td class="fw-bold">{{ entry.weight }} kg</td>
+
+                    <td>
+                        {% if entry.variation is not none %}
+                            {% if entry.variation < 0 %}
+                                <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-arrow-down"></i> {{ entry.variation|abs }}</span>
+                            {% elif entry.variation > 0 %}
+                                <span class="badge bg-danger bg-opacity-10 text-danger"><i class="bi bi-arrow-up"></i> {{ entry.variation }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary bg-opacity-10 text-secondary">-</span>
+                            {% endif %}
+                        {% else %}
+                            <small class="text-muted">Inicio</small>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <span class="fw-bold small">{{ entry.imc if entry.imc else '--' }}</span>
+                    </td>
+
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-light text-primary me-1"
+                                data-bs-toggle="modal" data-bs-target="#editWeightModal"
+                                data-id="{{ entry._id }}" data-weight="{{ entry.weight }}" data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}"
+                                title="Editar">
+                            <i class="bi bi-pencil-square fs-6"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light text-danger"
+                                data-bs-toggle="modal" data-bs-target="#deleteWeightModal"
+                                data-id="{{ entry._id }}"
+                                title="Eliminar">
+                            <i class="bi bi-trash fs-6"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if total_entries > 15 %}
+    <div class="card-footer bg-white text-center py-3">
+        <a href="{{ url_for('main.full_history') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4">
+            Ver historial completo
+        </a>
+    </div>
+    {% endif %}
+</div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-        // Obtener la fecha de hoy en formato YYYY-MM-DD
-        const today = new Date().toISOString().split('T')[0];
-        // Asignarla al input
-        document.getElementById('dateInput').value = today;
+    const ctx = document.getElementById('weightChart').getContext('2d');
+
+    // Recibimos los datos de Python (Jinja2 los renderiza aquí)
+    const labels = {{ dates_labels | safe }};
+    const dataPoints = {{ weights_data | safe }};
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Peso (kg)',
+                data: dataPoints,
+                borderColor: '#0d6efd', // Color azul Bootstrap
+                backgroundColor: 'rgba(13, 110, 253, 0.1)', // Relleno suave abajo
+                borderWidth: 3,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#0d6efd',
+                pointRadius: 5,
+                tension: 0.4, // Hace la línea curva y suave
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false } // Ocultamos leyenda porque es obvio
+            },
+            scales: {
+                y: {
+                    grid: { borderDash: [5, 5] }, // Líneas punteadas
+                    beginAtZero: false // Para que el gráfico se enfoque en el rango de peso real
+                },
+                x: {
+                    grid: { display: false } // Ocultamos cuadrícula vertical para limpieza
+                }
+            }
+        }
     });
-</script>
-<script>
-    // 1. Lógica para el Modal de EDITAR
-    var editModal = document.getElementById('editWeightModal')
-    editModal.addEventListener('show.bs.modal', function (event) {
-        // Botón que activó el modal
-        var button = event.relatedTarget
-        // Extraer info de los atributos data-*
-        var id = button.getAttribute('data-id')
-        var weight = button.getAttribute('data-weight')
-        var date = button.getAttribute('data-date')
-
-        // Actualizar los inputs del modal
-        var modalBodyInputWeight = editModal.querySelector('#editWeightInput')
-        var modalBodyInputDate = editModal.querySelector('#editDateInput')
-        var editForm = editModal.querySelector('#editForm')
-
-        modalBodyInputWeight.value = weight
-        modalBodyInputDate.value = date
-
-        // Actualizar la URL del formulario (Action)
-        editForm.action = "/edit_weight/" + id
-    })
-
-    // 2. Lógica para el Modal de ELIMINAR
-    var deleteModal = document.getElementById('deleteWeightModal')
-    deleteModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget
-        var id = button.getAttribute('data-id')
-        var deleteForm = deleteModal.querySelector('#deleteForm')
-
-        // Actualizar la URL del formulario
-        deleteForm.action = "/delete_weight/" + id
-    })
 </script>
 
 {% endblock %}

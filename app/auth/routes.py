@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
+from app.auth.forms import RegistrationForm
 from bson.objectid import ObjectId
 
 # Definimos el Blueprint
@@ -9,53 +10,61 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        name = request.form.get('name')
-        gender = request.form.get('gender')
+    form = RegistrationForm()
 
-        # Manejo de campos opcionales vacíos
-        height_val = request.form.get('height')
-        weight_val = request.form.get('weight')
+    if form.validate_on_submit():
+        # 1. Obtener datos limpios del formulario
+        email = form.email.data
+        name = form.name.data
+        password = form.password.data
+        gender = form.gender.data
+        height = form.height.data
+        weight = form.weight.data
 
         users_collection = current_app.db.users
 
+        # 2. Verificar si el usuario ya existe
         if users_collection.find_one({'email': email}):
-            flash('El correo ya está registrado.', 'danger')
+            flash('Este correo electrónico ya está registrado.', 'danger')
             return redirect(url_for('auth.register'))
 
-        # 1. Crear el documento del Usuario (SIN el peso)
+        # 3. Hashear contraseña
+        hashed_pw = generate_password_hash(password)
+
+        # 4. Crear objeto de Usuario
         user_data = {
             'email': email,
-            'password': generate_password_hash(password),
+            'password': hashed_pw,
             'name': name,
             'is_admin': False,
             'created_at': datetime.now(timezone.utc),
             'profile': {
-                'gender': gender,
-                'height': height_val if height_val else None,
-                # NOTA: Ya no guardamos current_weight aquí
+                'gender': gender if gender else None,
+                'height': height if height else None
+                # NOTA: No guardamos el peso aquí para evitar duplicidad
             }
         }
 
-        # Insertamos y obtenemos el ID del nuevo usuario
+        # 5. Insertar usuario en MongoDB
         result = users_collection.insert_one(user_data)
         new_user_id = str(result.inserted_id)
 
-        # 2. Si el usuario ingresó peso, lo guardamos en la colección de HISTORIAL
-        if weight_val:
+        # 6. Si ingresó un peso inicial, guardarlo en el HISTORIAL
+        if weight:
             current_app.db.weight_entries.insert_one({
-                'user_id': new_user_id,  # Vinculamos con el ID recién creado
-                'weight': float(weight_val),
-                'recorded_date': datetime.now(timezone.utc),  # Fecha registro = Fecha pesaje
-                'created_at': datetime.now(timezone.utc)
+                'user_id': new_user_id,
+                'weight': float(weight),
+                'recorded_date': datetime.now(timezone.utc),  # Fecha del registro
+                'created_at': datetime.now(timezone.utc),  # Fecha de auditoría
+                # Calculamos el IMC inicial si hay altura, para que el registro esté completo
+                'imc': round(float(weight) / ((height / 100) ** 2), 1) if height else None
             })
 
-        flash('Registro exitoso.', 'success')
+        flash('Cuenta creada exitosamente. Por favor, inicia sesión.', 'success')
         return redirect(url_for('auth.login'))
 
-    return render_template('auth/register.html')
+    # Si hay errores o es GET, renderizamos el template pasando el formulario
+    return render_template('auth/register.html', form=form)
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])

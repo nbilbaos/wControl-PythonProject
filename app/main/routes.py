@@ -6,67 +6,75 @@ from datetime import datetime, timezone
 
 main_bp = Blueprint('main', __name__)
 
+
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
     user_id = session['user_id']
     user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
 
-    # 1. OPTIMIZACIÓN: Contar el total sin traer los documentos (muy rápido)
+    # 1. Total de entradas (para saber si mostrar el botón "Ver más")
     total_entries = current_app.db.weight_entries.count_documents({'user_id': user_id})
 
-    # 2. OPTIMIZACIÓN: Traer solo 16 documentos (15 para mostrar + 1 para calcular la variación del #15)
-    # Esto asegura que la carga sea instantánea aunque haya 1 millón de registros.
+    # 2. Obtenemos historial (Limitado a 15 para la tabla)
     cursor = current_app.db.weight_entries.find({'user_id': user_id}) \
         .sort('recorded_date', pymongo.DESCENDING) \
-        .limit(16)
-
-    # Convertimos a lista solo estos 16 elementos
+        .limit(15)
     fetched_entries = list(cursor)
 
-    # 3. Procesamiento (Igual que antes, pero solo sobre la lista pequeña)
+    # 3. Procesamos IMC y Variación (Igual que antes)
     profile = user.get('profile', {})
     height_cm = profile.get('height')
     height_m = (float(height_cm) / 100) if height_cm else None
 
     for i in range(len(fetched_entries)):
         entry = fetched_entries[i]
-
-        # Cálculo de IMC (solo depende del propio registro)
         if height_m:
             entry['imc'] = round(entry['weight'] / (height_m ** 2), 1)
         else:
             entry['imc'] = None
 
-        # Cálculo de Variación (necesita al vecino siguiente)
-        # Si estamos en el índice 14 (el elemento 15), miramos el índice 15 (el elemento 16)
         if i < len(fetched_entries) - 1:
-            prev_entry = fetched_entries[i + 1]
-            entry['variation'] = round(entry['weight'] - prev_entry['weight'], 1)
+            entry['variation'] = round(entry['weight'] - fetched_entries[i + 1]['weight'], 1)
         else:
-            # Si estamos en el último elemento traído (sea el 16 o menos si hay pocos datos)
-            # no podemos calcular variación hacia atrás.
             entry['variation'] = None
 
-    # 4. Datos Finales para la Vista
-    # El peso actual es el más reciente
-    current_weight = fetched_entries[0]['weight'] if fetched_entries else None
+    # 4. DATOS CLAVE PARA EL DASHBOARD
+    current_weight = fetched_entries[0]['weight'] if fetched_entries else 0
 
-    # IMC actual para la barra visual
+    # IMC Actual
     current_bmi = None
     if current_weight and height_m:
         current_bmi = round(current_weight / (height_m ** 2), 1)
 
-    # 5. RECORTE FINAL: Enviamos solo los primeros 15 a la tabla
-    # El elemento 16 (si existe) se usó solo para el cálculo y aquí se descarta visualmente.
-    display_history = fetched_entries[:15]
+    # --- NUEVO: Cálculo de Progreso Total (Peso Actual - Primer Peso Histórico) ---
+    # Buscamos el registro más antiguo de TODOS (no solo de los 15 cargados)
+    first_entry = current_app.db.weight_entries.find_one(
+        {'user_id': user_id},
+        sort=[('recorded_date', pymongo.ASCENDING)]  # Orden ascendente: el más viejo primero
+    )
+
+    start_weight = first_entry['weight'] if first_entry else current_weight
+    total_change = round(current_weight - start_weight, 1)  # Ej: -5.5 kg
+
+    # --- NUEVO: Datos para el Gráfico (Chart.js) ---
+    # Invertimos la lista para que el gráfico vaya de izquierda (pasado) a derecha (hoy)
+    chart_data = fetched_entries[::-1]
+
+    # Creamos dos listas simples que JS pueda leer
+    dates_labels = [entry['recorded_date'].strftime('%d/%m') for entry in chart_data]
+    weights_data = [entry['weight'] for entry in chart_data]
 
     return render_template('main/dashboard.html',
                            user=user,
                            current_weight=current_weight,
                            current_bmi=current_bmi,
-                           weight_history=display_history,  # Lista de máximo 15 items
-                           total_entries=total_entries)  # Total real (ej: 100, 500) para el botón
+                           weight_history=fetched_entries,
+                           total_entries=total_entries,
+                           # Nuevas variables enviadas:
+                           total_change=total_change,
+                           dates_labels=dates_labels,
+                           weights_data=weights_data)
 
 @main_bp.route('/')
 def index():
