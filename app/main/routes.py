@@ -7,65 +7,90 @@ from app.auth.forms import ProfileForm
 from werkzeug.security import check_password_hash, generate_password_hash
 main_bp = Blueprint('main', __name__)
 
+
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
     user_id = session['user_id']
     user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
 
-    # 1. Total de entradas (para saber si mostrar el botón "Ver más")
+    # 1. Traemos solo lo esencial de la base de datos
     total_entries = current_app.db.weight_entries.count_documents({'user_id': user_id})
 
-    # 2. Obtenemos historial (Limitado a 15 para la tabla)
+    # Traemos 11 para la tabla y cálculos de variación
     cursor = current_app.db.weight_entries.find({'user_id': user_id}) \
         .sort('recorded_date', pymongo.DESCENDING) \
         .limit(11)
     fetched_entries = list(cursor)
 
-    # 3. Procesamos IMC y Variación (Igual que antes)
+    # Traemos el primer registro histórico de forma eficiente
+    first_entry = current_app.db.weight_entries.find_one(
+        {'user_id': user_id},
+        sort=[('recorded_date', pymongo.ASCENDING)]
+    )
+
+    # 2. Definición de variables base (Evitamos errores si no hay datos)
+    current_weight = fetched_entries[0]['weight'] if fetched_entries else 0
+    start_weight = first_entry['weight'] if first_entry else current_weight
+
     profile = user.get('profile', {})
+    weight_goal = profile.get('weight_goal')
     height_cm = profile.get('height')
     height_m = (float(height_cm) / 100) if height_cm else None
 
+    # 3. Cálculo de Progreso y Metas
+    progress_pct = 0
+    kg_remaining = 0
+
+    if weight_goal and start_weight != weight_goal:
+        total_distance = abs(start_weight - weight_goal)
+        distance_covered = abs(start_weight - current_weight)
+
+        # Lógica para evitar progreso negativo si el usuario se aleja de la meta
+        if (start_weight > weight_goal and current_weight > start_weight) or \
+                (start_weight < weight_goal and current_weight < start_weight):
+            progress_pct = 0
+        else:
+            progress_pct = round((distance_covered / total_distance) * 100)
+
+        kg_remaining = round(abs(current_weight - weight_goal), 1)
+
+    progress_pct = min(progress_pct, 100)
+    total_change = round(current_weight - start_weight, 1)
+
+    # 4. Procesamiento de la tabla (IMC y Variación)
     for i in range(len(fetched_entries)):
         entry = fetched_entries[i]
+        # IMC
         if height_m:
             entry['imc'] = round(entry['weight'] / (height_m ** 2), 1)
         else:
             entry['imc'] = None
-
+        # Variación
         if i < len(fetched_entries) - 1:
             entry['variation'] = round(entry['weight'] - fetched_entries[i + 1]['weight'], 1)
         else:
             entry['variation'] = None
 
-    # 4. DATOS CLAVE PARA EL DASHBOARD
-    current_weight = fetched_entries[0]['weight'] if fetched_entries else 0
-
-    # IMC Actual
+    # 5. Datos para el Gráfico y la Vista
     current_bmi = None
     if current_weight and height_m:
         current_bmi = round(current_weight / (height_m ** 2), 1)
 
-    # --- NUEVO: Cálculo de Progreso Total (Peso Actual - Primer Peso Histórico) ---
-    # Buscamos el registro más antiguo de TODOS (no solo de los 15 cargados)
-    first_entry = current_app.db.weight_entries.find_one(
-        {'user_id': user_id},
-        sort=[('recorded_date', pymongo.ASCENDING)]  # Orden ascendente: el más viejo primero
-    )
-
-    start_weight = first_entry['weight'] if first_entry else current_weight
-    total_change = round(current_weight - start_weight, 1)  # Ej: -5.5 kg
-
-    # --- NUEVO: Datos para el Gráfico (Chart.js) ---
-    # Invertimos la lista para que el gráfico vaya de izquierda (pasado) a derecha (hoy)
     chart_data = fetched_entries[::-1]
-
-    # Creamos dos listas simples que JS pueda leer
     dates_labels = [entry['recorded_date'].strftime('%d/%m') for entry in chart_data]
     weights_data = [entry['weight'] for entry in chart_data]
 
+    # Recorte final para mostrar solo 10 en la tabla
     display_history = fetched_entries[:10]
+
+    # Definimos los hitos de los logros
+    logros = {
+        'bronce': progress_pct >= 25,
+        'plata': progress_pct >= 50,
+        'oro': progress_pct >= 75,
+        'campeon': progress_pct >= 100
+    }
 
     return render_template('main/dashboard.html',
                            user=user,
@@ -73,10 +98,17 @@ def dashboard():
                            current_bmi=current_bmi,
                            weight_history=display_history,
                            total_entries=total_entries,
-                           # Nuevas variables enviadas:
+                           weight_goal=weight_goal,
+                           progress_pct=progress_pct,
+                           logros=logros,
+                           start_weight=start_weight,
+                           kg_remaining=kg_remaining,
                            total_change=total_change,
                            dates_labels=dates_labels,
                            weights_data=weights_data)
+
+
+
 
 @main_bp.route('/')
 def index():

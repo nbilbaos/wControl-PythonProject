@@ -61,6 +61,53 @@
     </div>
 </div>
 
+{% if weight_goal %}
+<div class="card shadow-sm border-0 mb-4 bg-white">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h5 class="fw-bold mb-0">Tu Meta: {{ weight_goal }} kg</h5>
+                <p class="text-muted small mb-0">
+                    {% if current_weight > weight_goal %}
+                        Te faltan <strong>{{ kg_remaining }} kg</strong> para bajar.
+                    {% else %}
+                        Te faltan <strong>{{ kg_remaining }} kg</strong> para subir.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-primary rounded-pill px-3">{{ progress_pct }}% Completado</span>
+            </div>
+        </div>
+
+        <div class="progress rounded-pill" style="height: 25px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                 role="progressbar"
+                 style="width: {{ progress_pct }}%;"
+                 aria-valuenow="{{ progress_pct }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+                 {{ progress_pct }}%
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-2 small text-muted">
+            <span>Inicio: {{ start_weight if start_weight else '--' }} kg</span>
+            <span>Meta: {{ weight_goal }} kg</span>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-light border shadow-sm mb-4 d-flex align-items-center">
+    <i class="bi bi-info-circle-fill text-primary fs-4 me-3"></i>
+    <div>
+        <strong>¿Tienes un objetivo en mente?</strong>
+        Configura tu meta de peso en tu <a href="{{ url_for('main.profile') }}" class="fw-bold">perfil</a> para ver tu progreso aquí.
+    </div>
+</div>
+{% endif %}
+
+
 <div class="card mb-4 p-4">
     <h5 class="fw-bold mb-3">Tendencia de Peso (Últimos registros)</h5>
     <div style="height: 300px;">
@@ -152,6 +199,124 @@
     </style>
 
 </div>
+
+<div class="card shadow-sm border-0 mb-4 bg-white">
+    <div class="card-header bg-white border-0 py-3">
+        <h5 class="fw-bold mb-0 text-dark">
+            <i class="bi bi-trophy text-warning me-2"></i> Logros del Camino
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="row text-center g-2">
+
+            <div class="col-3">
+                <div class="achievement-wrapper {% if logros.bronce %}active{% endif %}" id="medal-bronce">
+                    <div class="icon-circle shadow-sm">
+                        <i class="bi bi-medal-fill"></i>
+                    </div>
+                    <p class="small fw-bold mt-2 mb-0">25%</p>
+                    <span class="text-muted extra-small">Bronce</span>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <div class="achievement-wrapper {% if logros.plata %}active{% endif %}" id="medal-plata">
+                    <div class="icon-circle shadow-sm">
+                        <i class="bi bi-medal-fill"></i>
+                    </div>
+                    <p class="small fw-bold mt-2 mb-0">50%</p>
+                    <span class="text-muted extra-small">Plata</span>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <div class="achievement-wrapper {% if logros.oro %}active{% endif %}" id="medal-oro">
+                    <div class="icon-circle shadow-sm">
+                        <i class="bi bi-medal-fill"></i>
+                    </div>
+                    <p class="small fw-bold mt-2 mb-0">75%</p>
+                    <span class="text-muted extra-small">Oro</span>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <div class="achievement-wrapper {% if logros.campeon %}active{% endif %}" id="medal-campeon">
+                    <div class="icon-circle shadow-sm">
+                        <i class="bi bi-trophy-fill"></i>
+                    </div>
+                    <p class="small fw-bold mt-2 mb-0">100%</p>
+                    <span class="text-muted extra-small">¡Meta!</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 1. Estilo Base (Estado Bloqueado / Default) */
+    .achievement-wrapper .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+
+        /* COLOR POR DEFECTO (GRIS VISIBLE) */
+        background-color: #e9ecef; /* Gris muy claro de fondo */
+        color: #adb5bd;            /* Gris medio para el icono */
+    }
+
+    .achievement-wrapper {
+        opacity: 0.6; /* Un poco transparente, pero legible */
+        transform: scale(0.95);
+        transition: all 0.3s ease;
+    }
+
+    /* 2. Estilo Activo (Estado Desbloqueado) */
+    .achievement-wrapper.active {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    /* COLORES ESPECÍFICOS CUANDO ESTÁ ACTIVO */
+
+    /* Bronce Activo */
+    .achievement-wrapper.active#medal-bronce .icon-circle {
+        background-color: #fff5eb;
+        color: #cd7f32; /* Color Bronce */
+        box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important;
+    }
+
+    /* Plata Activo */
+    .achievement-wrapper.active#medal-plata .icon-circle {
+        background-color: #f8f9fa;
+        color: #7a7a7a; /* Color Plata Oscuro (para que se vea bien) */
+        box-shadow: 0 0 10px rgba(122, 122, 122, 0.3) !important;
+    }
+
+    /* Oro Activo */
+    .achievement-wrapper.active#medal-oro .icon-circle {
+        background-color: #fffdf0;
+        color: #ffc107; /* Color Oro */
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.4) !important;
+    }
+
+    /* Campeón Activo */
+    .achievement-wrapper.active#medal-campeon .icon-circle {
+        background-color: #e7f1ff;
+        color: #0d6efd; /* Azul Brillante */
+        box-shadow: 0 0 15px rgba(13, 110, 253, 0.4) !important;
+    }
+
+    .extra-small { font-size: 0.7rem; }
+</style>
+
+
 
 <div class="card mb-4 overflow-hidden">
     <div class="card-header bg-white py-3">
@@ -382,6 +547,23 @@
         const today = new Date().toISOString().split('T')[0];
         // Asignarla al input
         document.getElementById('dateInput').value = today;
+    });
+</script>
+<script>
+    // Script para añadir interactividad y asegurar que los estados carguen bien
+    document.addEventListener('DOMContentLoaded', function() {
+        const progress = {{ progress_pct | default(0) }};
+        console.log("Progreso actual detectado por script:", progress + "%");
+
+        // Podemos añadir una animación de entrada para los logros desbloqueados
+        const activeAchievements = document.querySelectorAll('.achievement-wrapper.active');
+        activeAchievements.forEach((el, index) => {
+            el.style.opacity = "0";
+            setTimeout(() => {
+                el.style.opacity = "1";
+                // Efecto de sonido opcional o destello visual aquí
+            }, 200 * index);
+        });
     });
 </script>
 {% endblock %}
