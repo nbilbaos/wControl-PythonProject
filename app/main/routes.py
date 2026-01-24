@@ -3,9 +3,9 @@ from flask import Blueprint, render_template, session, current_app, request, url
 from app.decorators import login_required
 from bson.objectid import ObjectId
 from datetime import datetime, timezone
-
+from app.auth.forms import ProfileForm
+from werkzeug.security import check_password_hash, generate_password_hash
 main_bp = Blueprint('main', __name__)
-
 
 @main_bp.route('/dashboard')
 @login_required
@@ -83,37 +83,58 @@ def index():
     # Una página de inicio pública (Landing page)
     return render_template('main/index.html')
 
+
 @main_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    users_collection = current_app.db.users
     user_id = session['user_id']
+    users_collection = current_app.db.users
+    user = users_collection.find_one({'_id': ObjectId(user_id)})
 
-    if request.method == 'POST':
-        # Recolectar datos del formulario
-        profile_data = {
-            'gender': request.form.get('gender'),
-            'age': request.form.get('age'),
-            'height': request.form.get('height'),  # En cm
-            'current_weight': request.form.get('weight'), # En kg
-            'activity_level': request.form.get('activity_level'), # Sedentario, Activo, etc.
-            'goal': request.form.get('goal') # Perder peso, mantener, ganar
+    form = ProfileForm()
+
+    if form.validate_on_submit():
+        # 1. VERIFICACIÓN DE SEGURIDAD: ¿Es correcta la contraseña actual?
+        if not check_password_hash(user['password'], form.current_password.data):
+            flash('La contraseña actual es incorrecta.', 'danger')
+            return redirect(url_for('main.profile'))
+
+        # 2. Preparar datos básicos de actualización
+        update_data = {
+            'name': form.name.data,
+            'email': form.email.data,
+            'profile.gender': form.gender.data,
+            'profile.height': form.height.data,
+            'profile.weight_goal': form.weight_goal.data
         }
 
-        # Actualizamos solo el campo 'profile' del usuario usando $set
+        # 3. ¿El usuario quiere cambiar su contraseña?
+        if form.new_password.data:
+            update_data['password'] = generate_password_hash(form.new_password.data)
+
+        # 4. Ejecutar actualización en MongoDB
         users_collection.update_one(
             {'_id': ObjectId(user_id)},
-            {'$set': {'profile': profile_data}}
+            {'$set': update_data}
         )
 
-        flash('Información actualizada correctamente.', 'success')
+        # 5. Actualizar sesión por si cambió el nombre o email
+        session['name'] = form.name.data
+        session['email'] = form.email.data
+
+        flash('Perfil y credenciales actualizados con éxito.', 'success')
         return redirect(url_for('main.profile'))
 
-    # Método GET: Buscamos al usuario para pre-llenar el formulario
-    user = users_collection.find_one({'_id': ObjectId(user_id)})
-    user_profile = user.get('profile', {})
+    # Carga inicial de datos
+    if request.method == 'GET':
+        form.name.data = user.get('name')
+        form.email.data = user.get('email')
+        profile_data = user.get('profile', {})
+        form.gender.data = profile_data.get('gender', '')
+        form.height.data = profile_data.get('height')
+        form.weight_goal.data = profile_data.get('weight_goal')
 
-    return render_template('main/profile.html', profile=user_profile)
+    return render_template('main/profile.html', form=form)
 
 
 @main_bp.route('/add_weight_entry', methods=['POST'])

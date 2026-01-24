@@ -32,3 +32,27 @@ class RegistrationForm(FlaskForm):
     weight = FloatField('Peso Inicial (kg)', validators=[Optional(), NumberRange(min=20, max=300)])
 
     submit = SubmitField('Registrarse')
+
+
+class ProfileForm(FlaskForm):
+    # Datos Generales
+    name = StringField('Nombre Completo', validators=[DataRequired()])
+    email = StringField('Correo Electrónico', validators=[DataRequired(), Email()])
+
+    # Datos Físicos
+    gender = SelectField('Género', choices=[('', 'Seleccionar...'), ('male', 'Hombre'), ('female', 'Mujer')])
+    height = FloatField('Altura (cm)', validators=[DataRequired()])
+    weight_goal = FloatField('Meta de Peso (kg)', validators=[DataRequired()])
+
+    # Seguridad (Opcionales)
+    new_password = PasswordField('Nueva Contraseña (dejar en blanco para no cambiar)',
+                                 validators=[Optional(), Length(min=8)])
+    confirm_password = PasswordField('Confirmar Nueva Contraseña',
+                                     validators=[EqualTo('new_password', message='Las contraseñas no coinciden')])
+
+    # Validación Requerida para cambios sensibles
+    current_password = PasswordField('Contraseña Actual (requerida para guardar cambios)',
+                                     validators=[
+                                         DataRequired(message="Debes ingresar tu contraseña actual para confirmar")])
+
+    submit = SubmitField('Guardar Cambios')
