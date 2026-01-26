@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-people-fill text-success me-2"></i> Gestión de Usuarios</h2>
+        <a href="{{ url_for('admin.panel') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Registro</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_admin %}
+                                    <span class="badge bg-warning text-dark">Admin</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary">Usuario</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">
+                                {{ user.created_at.strftime('%d-%m-%Y') if user.created_at else 'N/A' }}
+                            </td>
+                            <td class="text-end pe-4">
+                                {% if user._id|string != session['user_id'] %}
+                                    <form action="{{ url_for('admin.delete_user', user_id=user._id) }}" method="POST" onsubmit="return confirm('¿Estás SEGURO? Se borrará el usuario y todo su historial de pesos permanentemente.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar Usuario">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted small">Tú</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

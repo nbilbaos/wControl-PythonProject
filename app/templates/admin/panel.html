@@ -39,9 +39,9 @@
                     </div>
                     <h4 class="fw-bold">Usuarios</h4>
                     <p class="text-muted small">Ver lista de usuarios registrados, editar perfiles o bloquear accesos.</p>
-                    <button class="btn btn-outline-success rounded-pill w-100 disabled">
-                        Próximamente
-                    </button>
+                    <a href="{{ url_for('admin.manage_users') }}" class="btn btn-outline-success rounded-pill w-100 stretched-link">
+                        Gestionar Usuarios
+                    </a>
                 </div>
             </div>
         </div>
@@ -54,9 +54,9 @@
                     </div>
                     <h4 class="fw-bold">Métricas</h4>
                     <p class="text-muted small">Estadísticas globales de peso perdido por la comunidad y registros diarios.</p>
-                    <button class="btn btn-outline-info rounded-pill w-100 disabled">
-                        Próximamente
-                    </button>
+                        <a href="{{ url_for('admin.platform_metrics') }}" class="btn btn-outline-info rounded-pill w-100 stretched-link">
+                            Ver Reportes
+                        </a>
                 </div>
             </div>
         </div>
