@@ -258,6 +258,15 @@ def edit_weight(entry_id):
     )
 
     flash('Registro actualizado correctamente.', 'success')
+
+    # 2. REDIRECCIÓN INTELIGENTE
+    # Buscamos si el formulario envió una señal de "next"
+    next_page = request.form.get('next')
+
+    if next_page == 'history':
+        return redirect(url_for('main.full_history'))
+
+    # Por defecto, si no hay señal, volvemos al dashboard
     return redirect(url_for('main.dashboard'))
 
 # --- RUTA PARA ELIMINAR ---
@@ -267,7 +276,15 @@ def delete_weight(entry_id):
     current_app.db.weight_entries.delete_one(
         {'_id': ObjectId(entry_id), 'user_id': session['user_id']}
     )
+
     flash('Registro eliminado.', 'warning')
+
+    # REDIRECCIÓN INTELIGENTE
+    next_page = request.form.get('next') or request.args.get('next')
+
+    if next_page == 'history':
+        return redirect(url_for('main.full_history'))
+
     return redirect(url_for('main.dashboard'))
 
 
