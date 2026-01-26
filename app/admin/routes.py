@@ -180,3 +180,40 @@ def platform_metrics():
                            total_weight_lost=round(total_weight_lost, 1),
                            chart_labels=labels,
                            chart_data=data)
+
+
+# administración de imágen de fondo
+
+@admin_bp.route('/manage_background', methods=['GET', 'POST'])
+@login_required
+def manage_background():
+    if not session.get('is_admin'):
+        return redirect(url_for('main.dashboard'))
+
+    # Configuración de carpetas (Reutilizamos la carpeta de uploads)
+    base_path = os.path.join(current_app.root_path, 'static', 'uploads', 'backgrounds')
+    if not os.path.exists(base_path):
+        os.makedirs(base_path, exist_ok=True)
+
+    if request.method == 'POST':
+        file = request.files.get('background_image')
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(base_path, filename))
+
+            # 1. Desactivamos el fondo anterior (si quieres guardar historial)
+            # O simplemente borramos el registro anterior para tener solo uno activo
+            current_app.db.site_content.delete_many({'type': 'auth_background'})
+
+            # 2. Guardamos el nuevo
+            current_app.db.site_content.insert_one({
+                'type': 'auth_background',
+                'url': filename,
+                'created_at': datetime.now(timezone.utc)
+            })
+            flash('Fondo de pantalla actualizado.', 'success')
+
+    # Buscar la imagen actual
+    current_bg = current_app.db.site_content.find_one({'type': 'auth_background'})
+
+    return render_template('admin/manage_background.html', current_bg=current_bg)

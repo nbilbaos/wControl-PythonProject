@@ -56,3 +56,9 @@ class ProfileForm(FlaskForm):
                                          DataRequired(message="Debes ingresar tu contraseña actual para confirmar")])
 
     submit = SubmitField('Guardar Cambios')
+
+
+class LoginForm(FlaskForm):
+    email = StringField('Correo Electrónico', validators=[DataRequired(), Email()])
+    password = PasswordField('Contraseña', validators=[DataRequired()])
+    submit = SubmitField('Ingresar')

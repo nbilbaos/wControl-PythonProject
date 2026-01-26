@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #E6F6FF;
+            background-color: #f5f8f8;
 
         }
         .card {
@@ -45,14 +45,14 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-warning" href="{{ url_for('admin.manage_screenshots') }}">
-                                        <i class="bi bi-shield-lock"></i> Cargar imagenes
+                                        <i class="bi bi-card-image"></i> Cargar imagenes
                                     </a>
                                 </li>
                             {% endif %}
 
                             {% if not session.get('is_admin') %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                                <a class="nav-link text-warning" href="{{ url_for('main.dashboard') }}">
                                     <i class="bi bi-house"></i> Mi Dashboard
                                 </a>
                             </li>

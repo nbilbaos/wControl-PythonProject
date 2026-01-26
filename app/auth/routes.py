@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
-from app.auth.forms import RegistrationForm
+from app.auth.forms import RegistrationForm, LoginForm
 from bson.objectid import ObjectId
 
 # Definimos el Blueprint
@@ -11,6 +11,15 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
+
+    # --- NUEVO: Lógica de Imagen de Fondo ---
+    bg_data = current_app.db.site_content.find_one({'type': 'auth_background'})
+    if bg_data:
+        bg_url = url_for('static', filename='uploads/backgrounds/' + bg_data['url'])
+    else:
+        # Misma imagen de deporte por defecto
+        bg_url = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1920&q=80'
+    # ----------------------------------------
 
     if form.validate_on_submit():
         # 1. Obtener datos limpios del formulario
@@ -64,32 +73,51 @@ def register():
         return redirect(url_for('auth.login'))
 
     # Si hay errores o es GET, renderizamos el template pasando el formulario
-    return render_template('auth/register.html', form=form)
-
+    return render_template('auth/register.html', form=form, background_url=bg_url)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+    # 1. Instanciamos el formulario (Esto soluciona el error 'form undefined')
+    form = LoginForm()
+
+    # 2. Lógica de Imagen de Fondo (Tu código original mejorado)
+    bg_data = current_app.db.site_content.find_one({'type': 'auth_background'})
+
+    if bg_data:
+        bg_url = url_for('static', filename='uploads/backgrounds/' + bg_data['url'])
+    else:
+        # Imagen por defecto (Gym/Deporte)
+        bg_url = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1920&q=80'
+
+    # 3. Validación del Formulario
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
 
         users_collection = current_app.db.users
         user = users_collection.find_one({'email': email})
 
-        # 5. Verificación segura de la contraseña
+        # 4. Verificación de credenciales
         if user and check_password_hash(user['password'], password):
-            # Guardamos datos esenciales en la sesión
             session.clear()
             session['user_id'] = str(user['_id'])
             session['email'] = user['email']
+            # IMPORTANTE: Recuperamos el nombre para el menú superior
+            session['name'] = user.get('name', 'Usuario')
             session['is_admin'] = user.get('is_admin', False)
 
-            flash(f'Bienvenido de nuevo, {email}', 'success')
-            return redirect(url_for('main.dashboard'))  # ruta al dashboard de usuario
+            flash(f'Bienvenido de nuevo, {user.get("name")}', 'success')
+
+            # Redirección inteligente: Si es admin va al panel, si no al dashboard
+            if session['is_admin']:
+                return redirect(url_for('admin.panel'))
+            else:
+                return redirect(url_for('main.dashboard'))
 
         flash('Correo o contraseña incorrectos.', 'danger')
 
-    return render_template('auth/login.html')
+    # 5. Renderizado (Ahora 'form' y 'background_url' existen y son correctos)
+    return render_template('auth/login.html', form=form, background_url=bg_url)
 
 
 @auth_bp.route('/logout')
