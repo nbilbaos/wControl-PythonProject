@@ -1,174 +1,214 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <div class="container py-4">
-    
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold"><i class="bi bi-clock-history"></i> Historial Completo</h2>
-        <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver al Dashboard
-        </a>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Peso (kg)</th>
-                            <th>Variación</th>
-                            <th>IMC</th>
-                            <th class="text-end">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in weight_history %}
-                        <tr>
-                            <td>{{ entry.recorded_date.strftime('%d-%m-%Y') }}</td>
-                            <td><strong>{{ entry.weight }}</strong></td>
-                            
-                            <td>
-                                {% if entry.variation is not none %}
-                                    {% if entry.variation < 0 %}
-                                        <span class="badge bg-success bg-opacity-10 text-success fw-bold"><i class="bi bi-arrow-down"></i> {{ entry.variation }} kg</span>
-                                    {% elif entry.variation > 0 %}
-                                        <span class="badge bg-danger bg-opacity-10 text-danger fw-bold"><i class="bi bi-arrow-up"></i> +{{ entry.variation }} kg</span>
-                                    {% else %}
-                                        <span class="badge bg-primary bg-opacity-10 text-primary fw-bold"><i class="bi bi-dash"></i> 0 kg</span>
-                                    {% endif %}
-                                {% else %}
-                                    <span class="text-muted small">Primer registro</span>
-                                {% endif %}
-                            </td>
-
-                            <td>
-                                {% if entry.imc %}
-                                    {% if entry.imc < 18.5 %}
-                                        <span class="badge rounded-pill border" style="background-color: #d6eaff; color: #000;">{{ entry.imc }}</span>
-                                    {% elif entry.imc < 25 %}
-                                        <span class="badge rounded-pill border" style="background-color: #aadd77; color: #004d00;">{{ entry.imc }}</span>
-                                    {% elif entry.imc < 30 %}
-                                        <span class="badge rounded-pill border" style="background-color: #ffdd55; color: #554400;">{{ entry.imc }}</span>
-                                    {% elif entry.imc < 35 %}
-                                        <span class="badge rounded-pill border" style="background-color: #ffaa00; color: #000;">{{ entry.imc }}</span>
-                                    {% elif entry.imc < 40 %}
-                                        <span class="badge rounded-pill border" style="background-color: #ff6600; color: #fff;">{{ entry.imc }}</span>
-                                    {% else %}
-                                        <span class="badge rounded-pill border" style="background-color: #dc3545; color: #fff;">{{ entry.imc }}</span>
-                                    {% endif %}
-                                {% else %}
-                                    <small class="text-muted">N/A</small>
-                                {% endif %}
-                            </td>
-
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-primary me-1" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editWeightModal"
-                                        data-id="{{ entry._id }}"
-                                        data-weight="{{ entry.weight }}"
-                                        data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#deleteWeightModal"
-                                        data-id="{{ entry._id }}">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div>
+            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-secondary me-2"></i>Historial Completo</h2>
+            <p class="text-muted mb-0">Registro detallado de todas tus mediciones.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary rounded-pill me-2">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <button onclick="generateHistoryPDF()" class="btn btn-danger rounded-pill shadow-sm text-white">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+            </button>
         </div>
     </div>
+
+    <div id="history-report" class="bg-white p-4 rounded-3 shadow-sm border">
+
+        <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+            <div>
+                <h3 class="fw-bold text-primary mb-0">Weith Control</h3>
+                <small class="text-muted">Reporte de Progreso Personal</small>
+            </div>
+            <div class="text-end">
+                <h5 class="fw-bold mb-0">{{ session.get('name', 'Usuario') }}</h5>
+                <p class="text-muted small mb-0">Generado el: <span id="report-date-header"></span></p>
+            </div>
+        </div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th class="ps-3 py-3">Fecha</th>
+                <th class="py-3">Peso</th>
+                <th class="py-3">IMC</th>
+                <th class="py-3 text-end pe-3">Variación</th>
+                <th class="text-end pe-3 py-3 no-print" style="width: 100px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in weight_history %}
+            <tr>
+                <td class="ps-3 fw-bold text-secondary">
+                    {{ entry.recorded_date.strftime('%d/%m/%Y') }}
+                </td>
+                <td>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3">
+                        {{ entry.weight }} kg
+                    </span>
+                </td>
+                <td>
+                    {% if entry.imc %}
+                        <span class="fw-bold {{ 'text-success' if entry.imc < 25 else 'text-warning' }}">
+                            {{ entry.imc }}
+                        </span>
+                    {% else %}
+                        <span class="text-muted small">--</span>
+                    {% endif %}
+                </td>
+                <td class="text-end pe-3">
+                    {% if entry.variation is not none %}
+                        {% if entry.variation < 0 %}
+                            <span class="text-success fw-bold"><i class="bi bi-arrow-down-short"></i> {{ entry.variation|abs }}</span>
+                        {% elif entry.variation > 0 %}
+                            <span class="text-danger fw-bold"><i class="bi bi-arrow-up-short"></i> {{ entry.variation }}</span>
+                        {% else %}
+                            <span class="text-muted">=</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-secondary text-white small">Inicio</span>
+                    {% endif %}
+                </td>
+
+                <td class="text-end pe-3 no-print">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal{{ entry._id }}">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ entry._id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal fade text-start" id="editModal{{ entry._id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Editar Registro</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form action="{{ url_for('main.edit_weight', entry_id=entry._id) }}" method="POST">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Peso (kg)</label>
+                                            <input type="number" step="0.1" name="weight" class="form-control" value="{{ entry.weight }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Fecha</label>
+                                            <input type="date" name="date" class="form-control" value="{{ entry.recorded_date.strftime('%Y-%m-%d') }}" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade text-start" id="deleteModal{{ entry._id }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title">¿Eliminar registro?</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Estás a punto de eliminar el registro de <strong>{{ entry.weight }} kg</strong> del día {{ entry.recorded_date.strftime('%d/%m/%Y') }}.</p>
+                                    <p class="text-danger small mb-0">Esta acción no se puede deshacer.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <form action="{{ url_for('main.delete_weight', entry_id=entry._id) }}" method="POST">
+                                        <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
-<div class="modal fade" id="editWeightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Editar Registro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form id="editForm" method="POST">
-          <div class="modal-body">
-            <div class="mb-3">
-                <label class="form-label">Peso (kg)</label>
-                <input type="number" step="0.1" class="form-control" name="weight" id="editWeightInput" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" name="date" id="editDateInput" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
+        <div class="mt-5 pt-3 border-top text-center">
+            <p class="text-muted fst-italic small">
+                "Lo que no se mide, no se puede mejorar." - Este documento es un reporte generado automáticamente por la plataforma Weith Control.
+            </p>
+        </div>
 
-<div class="modal fade" id="deleteWeightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Confirmar Eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar este registro de peso?</p>
-        <p class="text-muted small">Esta acción no se puede deshacer.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <form id="deleteForm" method="POST">
-            <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
-        </form>
-      </div>
     </div>
-  </div>
 </div>
 
 <script>
-    // 1. Lógica para el Modal de EDITAR
-    var editModal = document.getElementById('editWeightModal')
-    editModal.addEventListener('show.bs.modal', function (event) {
-        // Botón que activó el modal
-        var button = event.relatedTarget
-        // Extraer info de los atributos data-*
-        var id = button.getAttribute('data-id')
-        var weight = button.getAttribute('data-weight')
-        var date = button.getAttribute('data-date')
+    // Poner la fecha de hoy automáticamente al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toLocaleDateString('es-CL', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+        document.getElementById('report-date-header').innerText = today;
+    });
 
-        // Actualizar los inputs del modal
-        var modalBodyInputWeight = editModal.querySelector('#editWeightInput')
-        var modalBodyInputDate = editModal.querySelector('#editDateInput')
-        var editForm = editModal.querySelector('#editForm')
+    function generateHistoryPDF() {
+        const element = document.getElementById('history-report');
+        const userName = "{{ session.get('name', 'Usuario') }}".replace(/\s+/g, '_');
 
-        modalBodyInputWeight.value = weight
-        modalBodyInputDate.value = date
+        const opt = {
+            margin:       [15, 15, 15, 15],
+            filename:     `Historial_WeithControl_${userName}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
-        // Actualizar la URL del formulario (Action)
-        editForm.action = "/edit_weight/" + id
-    })
+        // 1. ACTIVAMOS EL MODO "LIMPIO" (Oculta los botones)
+        element.classList.add('printing-mode');
 
-    // 2. Lógica para el Modal de ELIMINAR
-    var deleteModal = document.getElementById('deleteWeightModal')
-    deleteModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget
-        var id = button.getAttribute('data-id')
-        var deleteForm = deleteModal.querySelector('#deleteForm')
-
-        // Actualizar la URL del formulario
-        deleteForm.action = "/delete_weight/" + id
-    })
+        // 2. GENERAMOS EL PDF
+        html2pdf().set(opt).from(element).save().then(() => {
+            // 3. DESACTIVAMOS EL MODO "LIMPIO" (Vuelven los botones)
+            element.classList.remove('printing-mode');
+        });
+    }
 </script>
 
+<style>
+    /* Estilos visuales de la tabla */
+    .table thead th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c757d;
+    }
+
+    /* MODO IMPRESIÓN (PDF) */
+    /* Cuando JS agrega esta clase al contenedor, ocurren estos cambios: */
+
+    .printing-mode {
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* ¡AQUÍ ESTÁ EL TRUCO! */
+    /* Ocultar cualquier elemento con la clase 'no-print' dentro del modo impresión */
+    .printing-mode .no-print {
+        display: none !important;
+    }
+
+    /* Opcional: Ajustar anchos de columna para que se vea bien sin los botones */
+    .printing-mode th:last-child,
+    .printing-mode td:last-child {
+        display: none !important;
+    }
+</style>
 {% endblock %}
