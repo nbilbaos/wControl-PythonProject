@@ -465,6 +465,98 @@
     </div>
   </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<div class="modal fade" id="achievementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg text-center" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
+            <div class="modal-header border-0 justify-content-end pb-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pb-5 pt-0">
+
+                <div class="mb-4 achievement-bounce">
+                    <i id="modalIcon" class="bi display-1"></i>
+                </div>
+
+                <h2 class="fw-bold text-dark mb-3">¡Nuevo Logro Desbloqueado!</h2>
+                <h4 id="modalTitle" class="fw-bold mb-3 text-uppercase" style="letter-spacing: 2px;"></h4>
+
+                <p class="text-muted px-4">
+                    Has demostrado una constancia increíble. ¡Sigue así, estás cada vez más cerca de tu meta!
+                </p>
+
+                <button type="button" class="btn btn-primary rounded-pill px-5 mt-3 shadow-sm" data-bs-dismiss="modal">
+                    ¡Genial, sigamos!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if new_achievement_unlocked %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos de los logros para personalizar el modal
+        const badgeData = {
+            'bronce': { title: 'Medalla de Bronce', color: '#cd7f32', icon: 'bi-medal-fill' },
+            'plata':  { title: 'Medalla de Plata',  color: '#7a7a7a', icon: 'bi-medal-fill' },
+            'oro':    { title: 'Medalla de Oro',    color: '#ffc107', icon: 'bi-medal-fill' },
+            'campeon':{ title: 'Trofeo de Campeón', color: '#0d6efd', icon: 'bi-trophy-fill' }
+        };
+
+        const unlocked = "{{ new_achievement_unlocked }}";
+        const data = badgeData[unlocked];
+
+        if (data) {
+            // 1. Personalizar Modal
+            const modalTitle = document.getElementById('modalTitle');
+            const modalIcon = document.getElementById('modalIcon');
+
+            modalTitle.innerText = data.title;
+            modalTitle.style.color = data.color;
+
+            modalIcon.classList.add(data.icon);
+            modalIcon.style.color = data.color;
+            modalIcon.style.filter = `drop-shadow(0 0 15px ${data.color})`;
+
+            // 2. Mostrar Modal
+            const myModal = new bootstrap.Modal(document.getElementById('achievementModal'));
+            myModal.show();
+
+            // 3. Lanzar Confeti
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { return clearInterval(interval); }
+                var particleCount = 50 * (timeLeft / duration);
+
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    });
+</script>
+{% endif %}
+
+<style>
+    /* Animación de rebote para el icono del modal */
+    .achievement-bounce {
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-20px);}
+        60% {transform: translateY(-10px);}
+    }
+</style>
+
 <script>
     const ctx = document.getElementById('weightChart').getContext('2d');
 

@@ -91,6 +91,7 @@ def dashboard():
         'oro': progress_pct >= 75,
         'campeon': progress_pct >= 100
     }
+    new_achievement_unlocked = session.pop('new_achievement', None)
 
     return render_template('main/dashboard.html',
                            user=user,
@@ -101,14 +102,12 @@ def dashboard():
                            weight_goal=weight_goal,
                            progress_pct=progress_pct,
                            logros=logros,
+                           new_achievement_unlocked=new_achievement_unlocked,  # <--- Variable Nueva
                            start_weight=start_weight,
                            kg_remaining=kg_remaining,
                            total_change=total_change,
                            dates_labels=dates_labels,
                            weights_data=weights_data)
-
-
-
 
 @main_bp.route('/')
 def index():
@@ -168,34 +167,68 @@ def profile():
 
     return render_template('main/profile.html', form=form)
 
-
 @main_bp.route('/add_weight_entry', methods=['POST'])
 @login_required
 def add_weight_entry():
     user_id = session['user_id']
     weight = float(request.form.get('weight'))
-    date_str = request.form.get('date')  # Viene como string "2026-01-22"
-
-    # Convertimos la fecha del string a objeto datetime (para poder ordenar después)
-    # Asumimos que la hora de ese día es las 00:00:00
+    date_str = request.form.get('date')
     recorded_date = datetime.strptime(date_str, '%Y-%m-%d')
 
+    # 1. OBTENER DATOS ACTUALES (ANTES DE INSERTAR)
+    user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
+    profile = user.get('profile', {})
+    weight_goal = profile.get('weight_goal')
+
+    # Buscamos historial previo para calcular progreso anterior
+    history = list(current_app.db.weight_entries.find({'user_id': user_id}).sort('recorded_date', pymongo.DESCENDING))
+
+    current_weight_old = history[0]['weight'] if history else weight  # Si es el primero, usame a mi mismo
+    start_weight = history[-1]['weight'] if history else weight
+
+    # --- FUNCIÓN HELPER PARA CALCULAR PROGRESO ---
+    def calculate_progress(start, current, goal):
+        if not goal or start == goal: return 0
+        total_dist = abs(start - goal)
+        covered_dist = abs(start - current)
+
+        # Validación de dirección (si se aleja es 0)
+        if (start > goal and current > start) or (start < goal and current < start):
+            return 0
+
+        return min(round((covered_dist / total_dist) * 100), 100)
+
+    # 2. CALCULAR PORCENTAJE ANTES
+    pct_before = calculate_progress(start_weight, current_weight_old, weight_goal)
+
+    # 3. INSERTAR EL NUEVO PESO
     entry_data = {
         'user_id': user_id,
         'weight': weight,
-        'recorded_date': recorded_date,  # Fecha que eligió el usuario (para el gráfico)
-        'created_at': datetime.now(timezone.utc)  # Fecha real de auditoría (cuándo hizo clic)
+        'recorded_date': recorded_date,
+        'created_at': datetime.now(timezone.utc)
     }
-
-    # 1. Guardamos en la colección de HISTORIAL
     current_app.db.weight_entries.insert_one(entry_data)
 
-    # 2. Actualizamos el PESO ACTUAL en el perfil del usuario (Sincronización)
-    # Así el dashboard siempre muestra el último dato ingresado
-    current_app.db.users.update_one(
-        {'_id': ObjectId(user_id)},
-        {'$set': {'profile.current_weight': weight}}
-    )
+    # Actualizar perfil (opcional, pero mantenemos tu lógica)
+    current_app.db.users.update_one({'_id': ObjectId(user_id)}, {'$set': {'profile.current_weight': weight}})
+
+    # 4. CALCULAR PORCENTAJE DESPUÉS
+    pct_after = calculate_progress(start_weight, weight, weight_goal)
+
+    # 5. DETECTAR DESBLOQUEO (CRUCE DE UMBRALES)
+    new_badge = None
+    thresholds = {25: 'bronce', 50: 'plata', 75: 'oro', 100: 'campeon'}
+
+    for limit, badge_name in thresholds.items():
+        # Si antes estaba abajo del límite Y ahora estoy igual o arriba
+        if pct_before < limit <= pct_after:
+            new_badge = badge_name
+            break  # Solo celebramos el logro más alto alcanzado
+
+    # SI HAY LOGRO, LO GUARDAMOS EN LA SESIÓN PARA MOSTRARLO EN EL DASHBOARD
+    if new_badge:
+        session['new_achievement'] = new_badge
 
     flash('Peso registrado exitosamente.', 'success')
     return redirect(url_for('main.dashboard'))
