@@ -11,6 +11,10 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():
+    # Si es administrador, lo expulsamos del dashboard de usuarios y lo mandamos a su panel
+    if session.get('is_admin'):
+        return redirect(url_for('admin.panel'))
+
     user_id = session['user_id']
     user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
 
@@ -108,11 +112,12 @@ def dashboard():
                            total_change=total_change,
                            dates_labels=dates_labels,
                            weights_data=weights_data)
-
+#landig page
 @main_bp.route('/')
 def index():
-    # Una página de inicio pública (Landing page)
-    return render_template('main/index.html')
+    # Buscamos las capturas registradas por el admin
+    screenshots = list(current_app.db.site_content.find({'type': 'screenshot'}).sort('created_at', -1))
+    return render_template('main/index.html', screenshots=screenshots)
 
 
 @main_bp.route('/profile', methods=['GET', 'POST'])

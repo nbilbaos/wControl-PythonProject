@@ -4,11 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Correciones varias">
+    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Efectos al conseguir logros">
+      <change afterPath="$PROJECT_DIR$/app/templates/admin/manage_screenshots.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/admin/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/admin/routes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/main/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main/routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/admin/panel.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/admin/panel.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/main/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/main/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/main/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/main/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,8 +21,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
         <option value="Python Script" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -89,7 +92,7 @@
       <workItem from="1769169655869" duration="17169000" />
       <workItem from="1769262704496" duration="6517000" />
       <workItem from="1769353948082" duration="1000000" />
-      <workItem from="1769435509841" duration="627000" />
+      <workItem from="1769435509841" duration="4608000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -163,7 +166,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769271062545</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Efectos al conseguir logros">
+      <option name="closed" value="true" />
+      <created>1769436254268</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1769436254268</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -178,11 +189,12 @@
     <MESSAGE value="Varios" />
     <MESSAGE value="Mejoras visuales" />
     <MESSAGE value="Correciones varias" />
-    <option name="LAST_COMMIT_MESSAGE" value="Correciones varias" />
+    <MESSAGE value="Efectos al conseguir logros" />
+    <option name="LAST_COMMIT_MESSAGE" value="Efectos al conseguir logros" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PythonProject$create_admin.coverage" NAME="create_admin Coverage Results" MODIFIED="1769096939916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/PythonProject$run.coverage" NAME="run Coverage Results" MODIFIED="1769436175625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/PythonProject$routes.coverage" NAME="routes Coverage Results" MODIFIED="1769267540456" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app/main" />
+    <SUITE FILE_PATH="coverage/PythonProject$run.coverage" NAME="run Coverage Results" MODIFIED="1769441054281" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PythonProject$routes.coverage" NAME="routes Coverage Results" MODIFIED="1769440194417" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app/admin" />
   </component>
 </project>

@@ -1,45 +1,77 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="mb-4">Panel de Administración</h2>
-
-<div class="card">
-    <div class="card-header">
-        Lista de Usuarios Registrados
+<div class="container py-4">
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-8">
+            <h1 class="fw-bold display-5 text-dark">Panel de Administración</h1>
+            <p class="text-muted lead">Gestión centralizada de la plataforma.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-shield-lock-fill me-1"></i> Modo Superusuario
+            </span>
+        </div>
     </div>
-    <div class="card-body">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>ID (Mongo)</th>
-                    <th>Email</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td><small>{{ user._id }}</small></td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                        {% if user.is_admin %}
-                            <span class="badge bg-danger">Admin</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Usuario</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger">Eliminar</button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="4" class="text-center">No hay usuarios registrados.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-images display-4"></i>
+                    </div>
+                    <h4 class="fw-bold">Landing Page</h4>
+                    <p class="text-muted small">Administra las capturas de pantalla y el carrusel de la página de inicio.</p>
+                    <a href="{{ url_for('admin.manage_screenshots') }}" class="btn btn-outline-primary rounded-pill w-100 stretched-link">
+                        Gestionar Imágenes
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-people-fill display-4"></i>
+                    </div>
+                    <h4 class="fw-bold">Usuarios</h4>
+                    <p class="text-muted small">Ver lista de usuarios registrados, editar perfiles o bloquear accesos.</p>
+                    <button class="btn btn-outline-success rounded-pill w-100 disabled">
+                        Próximamente
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 hover-lift">
+                <div class="card-body p-4 text-center">
+                    <div class="icon-box bg-info bg-opacity-10 text-info rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-graph-up display-4"></i>
+                    </div>
+                    <h4 class="fw-bold">Métricas</h4>
+                    <p class="text-muted small">Estadísticas globales de peso perdido por la comunidad y registros diarios.</p>
+                    <button class="btn btn-outline-info rounded-pill w-100 disabled">
+                        Próximamente
+                    </button>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
+
+<style>
+    /* Efecto para levantar las tarjetas al pasar el mouse */
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
 {% endblock %}

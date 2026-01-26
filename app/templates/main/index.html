@@ -1,13 +1,83 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="px-4 py-5 my-5 text-center">
-    <h1 class="display-5 fw-bold">Bienvenido a Mi App</h1>
-    <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4">Esta es la aplicación segura construida con Flask y MongoDB.</p>
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg px-4 gap-3">Iniciar Sesión</a>
-            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-secondary btn-lg px-4">Registrarse</a>
+<div class="row align-items-center py-5">
+    <div class="col-lg-6">
+        <h1 class="display-3 fw-bold text-dark mb-3">Controla tu progreso, <span class="text-primary">alcanza tu meta.</span></h1>
+        <p class="lead text-muted mb-4">
+            Una plataforma diseñada para ingenieros y personas que buscan precisión en su salud. Monitorea tu peso, visualiza tendencias e IMC de forma profesional.
+        </p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-5 rounded-pill shadow">Empezar ahora</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg px-5 rounded-pill">Ingresar</a>
+        </div>
+    </div>
+    <div class="col-lg-6 mt-5 mt-lg-0">
+        <div id="appCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% if screenshots %}
+                    {% for screen in screenshots %}
+                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                        <img src="{{ url_for('static', filename='uploads/screenshots/' + screen.url) }}" class="d-block w-100" alt="{{ screen.description }}">
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="carousel-item active">
+                        <img src="https://via.placeholder.com/800x500?text=Dashboard+Preview" class="d-block w-100" alt="Preview">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="my-5">
+
+<div class="row py-5 text-center">
+    <h2 class="fw-bold mb-5">¿Cómo funciona?</h2>
+    <div class="col-md-4 mb-4">
+        <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+            <i class="bi bi-pencil-square display-4 text-primary mb-3"></i>
+            <h5 class="fw-bold">1. Registra</h5>
+            <p class="text-muted small">Ingresa tu peso diario en segundos desde cualquier dispositivo.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+            <i class="bi bi-graph-up-arrow display-4 text-success mb-3"></i>
+            <h5 class="fw-bold">2. Analiza</h5>
+            <p class="text-muted small">Visualiza gráficos de tendencia e indicadores de salud como el IMC.</p>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="p-4 bg-white rounded-4 shadow-sm h-100">
+            <i class="bi bi-trophy display-4 text-warning mb-3"></i>
+            <h5 class="fw-bold">3. Logra</h5>
+            <p class="text-muted small">Desbloquea medallas a medida que te acercas a tu meta configurada.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row my-5">
+    <div class="col-12">
+        <div class="card bg-dark text-white p-5 border-0 rounded-4 overflow-hidden position-relative">
+            <div class="position-absolute top-0 end-0 p-4 opacity-10">
+                <i class="bi bi-cpu display-1"></i>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-warning text-dark mb-3 px-3 py-2 rounded-pill fw-bold">ETAPA TEMPRANA (BETA)</span>
+                    <h2 class="fw-bold">Construyendo el futuro de tu salud</h2>
+                    <p class="lead opacity-75">
+                        Esta aplicación se encuentra en desarrollo activo. Estamos trabajando en nuevas funcionalidades como integración con wearables, planes de nutrición y reportes descargables en PDF.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="spinner-grow text-warning" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
