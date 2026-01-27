@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Corecciones a dashboard.html">
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="requirements.txt">
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,6 +87,7 @@
       <workItem from="1769262704496" duration="6517000" />
       <workItem from="1769353948082" duration="1000000" />
       <workItem from="1769435509841" duration="16713000" />
+      <workItem from="1769519057115" duration="777000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -224,7 +225,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769454890015</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="requirements.txt">
+      <option name="closed" value="true" />
+      <created>1769519118089</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1769519118089</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -246,7 +255,8 @@
     <MESSAGE value="Correciones redirección editar eliminar en historial" />
     <MESSAGE value="Se añadió pie de página" />
     <MESSAGE value="Corecciones a dashboard.html" />
-    <option name="LAST_COMMIT_MESSAGE" value="Corecciones a dashboard.html" />
+    <MESSAGE value="requirements.txt" />
+    <option name="LAST_COMMIT_MESSAGE" value="requirements.txt" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PythonProject$create_admin.coverage" NAME="create_admin Coverage Results" MODIFIED="1769096939916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
