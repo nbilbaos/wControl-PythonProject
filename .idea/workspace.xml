@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Cambios para render">
-      <change afterPath="$PROJECT_DIR$/create_admin_r.py" afterDir="false" />
+    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Scrip creación admin render">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -88,7 +87,7 @@
       <workItem from="1769262704496" duration="6517000" />
       <workItem from="1769353948082" duration="1000000" />
       <workItem from="1769435509841" duration="16713000" />
-      <workItem from="1769519057115" duration="2970000" />
+      <workItem from="1769519057115" duration="3926000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -250,7 +249,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769520138688</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Scrip creación admin render">
+      <option name="closed" value="true" />
+      <created>1769523723957</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1769523723957</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -274,7 +281,8 @@
     <MESSAGE value="Corecciones a dashboard.html" />
     <MESSAGE value="requirements.txt" />
     <MESSAGE value="Cambios para render" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambios para render" />
+    <MESSAGE value="Scrip creación admin render" />
+    <option name="LAST_COMMIT_MESSAGE" value="Scrip creación admin render" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PythonProject$create_admin.coverage" NAME="create_admin Coverage Results" MODIFIED="1769096939916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
