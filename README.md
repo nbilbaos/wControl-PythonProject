@@ -1,6 +1,6 @@
 # wControl Web / API 🌐
 
-**wControl** es la plataforma de backend y gestión diseñada para centralizar la información de iniciativas tecnológicas y de inversión. Actúa como el núcleo de datos para el ecosistema de aplicaciones de SigiPlan.
+**wControl** es la plataforma de backend y gestión diseñada para centralizar la información de iniciativas tecnológicas y de inversión. Actúa como el núcleo de datos para el ecosistema de aplicaciones de wControl.
 
 ## 🚀 Funcionalidades
 * **API RESTful:** Endpoints optimizados para la comunicación con clientes móviles y web.
