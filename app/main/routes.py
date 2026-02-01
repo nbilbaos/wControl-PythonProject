@@ -322,3 +322,7 @@ def full_history():
 
     # 3. Renderizar la plantilla específica del historial
     return render_template('main/history.html', weight_history=full_history)
+
+@main_bp.route('/privacidad')
+def privacidad():
+    return render_template('privacidad.html')
