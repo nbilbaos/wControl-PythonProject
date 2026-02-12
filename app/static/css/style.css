@@ -1,0 +1,32 @@
+/* app/static/css/style.css */
+
+/* Fuente y Fondo Global */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f5f8f8;
+}
+
+/* Estilos Globales para Tarjetas (Sobreescribe Bootstrap) */
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-radius: 12px;
+}
+
+/* Enlaces del Footer */
+.hover-link:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
+}
+
+/* Iconos Sociales con efecto Hover */
+.social-hover {
+    transition: all 0.3s ease;
+}
+
+.social-hover:hover {
+    background-color: #0d6efd;
+    color: white !important;
+    transform: translateY(-3px);
+    border-color: #0d6efd !important;
+}

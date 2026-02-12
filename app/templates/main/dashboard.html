@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
 {% block content %}
 
 <div id="dashboardData"
@@ -365,21 +369,8 @@
     </div>
 </div>
 
-<style>
-    .achievement-wrapper .icon-circle {
-        width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 1.8rem; transition: all 0.3s ease; background-color: #e9ecef; color: #adb5bd;
-    }
-    .achievement-wrapper { opacity: 0.6; transform: scale(0.95); transition: all 0.3s ease; }
-    .achievement-wrapper.active { opacity: 1; transform: scale(1.05); }
-    .achievement-wrapper.active#medal-bronce .icon-circle { background-color: #fff5eb; color: #cd7f32; box-shadow: 0 0 10px rgba(205, 127, 50, 0.3); }
-    .achievement-wrapper.active#medal-plata .icon-circle { background-color: #f8f9fa; color: #7a7a7a; box-shadow: 0 0 10px rgba(122, 122, 122, 0.3); }
-    .achievement-wrapper.active#medal-oro .icon-circle { background-color: #fffdf0; color: #ffc107; box-shadow: 0 0 10px rgba(255, 193, 7, 0.4); }
-    .achievement-wrapper.active#medal-campeon .icon-circle { background-color: #e7f1ff; color: #0d6efd; box-shadow: 0 0 15px rgba(13, 110, 253, 0.4); }
-    .extra-small { font-size: 0.7rem; }
-    .achievement-bounce { animation: bounce 2s infinite; }
-    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
-</style>
-
+{% endblock %}
+{% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
