@@ -258,16 +258,27 @@
                     </td>
                     <td>{{ entry.imc if entry.imc else '--' }}</td>
                     <td class="text-end pe-4">
-                        <button class="btn btn-sm btn-light text-primary me-1"
-                                data-bs-toggle="modal" data-bs-target="#editWeightModal"
-                                data-id="{{ entry._id }}" data-weight="{{ entry.weight }}" data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-sm btn-light text-danger"
-                                data-bs-toggle="modal" data-bs-target="#deleteWeightModal"
-                                data-id="{{ entry._id }}">
-                            <i class="bi bi-trash"></i>
-                        </button>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-sm btn-light text-primary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editWeightModal"
+                                    data-url="{{ url_for('main.edit_weight', entry_id=entry._id) }}"
+                                    data-weight="{{ entry.weight }}"
+                                    data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}"
+                                    title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+
+                            <button class="btn btn-sm btn-light text-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteWeightModal"
+                                    data-url="{{ url_for('main.delete_weight', entry_id=entry._id) }}"
+                                    data-weight="{{ entry.weight }}"
+                                    data-date="{{ entry.recorded_date.strftime('%d/%m/%Y') }}"
+                                    title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -276,98 +287,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="editWeightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Editar Registro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form id="editForm" method="POST">
-          <div class="modal-body">
-            <div class="mb-3">
-                <label class="form-label">Peso (kg)</label>
-                <input type="number" step="0.1" class="form-control" name="weight" id="editWeightInput" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" name="date" id="editDateInput" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="deleteWeightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Confirmar Eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar este registro?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <form id="deleteForm" method="POST">
-            <button type="submit" class="btn btn-danger">Eliminar</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="weightModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title">Nuevo Registro</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <form action="{{ url_for('main.add_weight_entry') }}" method="POST">
-          <div class="modal-body">
-            <div class="mb-3">
-                <label class="form-label">Peso (kg)</label>
-                <input type="number" step="0.1" class="form-control" name="weight" id="weightInput" placeholder="Ej: 75.5" required>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Fecha</label>
-                <input type="date" class="form-control" name="date" id="dateInput" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="achievementModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg text-center" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
-            <div class="modal-header border-0 justify-content-end pb-0">
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body pb-5 pt-0">
-                <div class="mb-4 achievement-bounce">
-                    <i id="modalIcon" class="bi display-1"></i>
-                </div>
-                <h2 class="fw-bold text-dark mb-3">¡Nuevo Logro Desbloqueado!</h2>
-                <h4 id="modalTitle" class="fw-bold mb-3 text-uppercase"></h4>
-                <p class="text-muted px-4">Has demostrado una constancia increíble.</p>
-                <button type="button" class="btn btn-primary rounded-pill px-5 mt-3 shadow-sm" data-bs-dismiss="modal">¡Genial!</button>
-            </div>
-        </div>
-    </div>
-</div>
+{% include 'main/partials/dashboard_modals.html' %}
 
 {% endblock %}
 {% block scripts %}

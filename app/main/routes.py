@@ -322,7 +322,7 @@ def full_history():
             query['recorded_date'] = {'$gte': s_date, '$lte': e_date}
             filter_label = f"Del {start_date_str} al {end_date_str}"
         except:
-            pass  # Fallback a todo si hay error
+            pass  # Fallback atodo si hay error
     elif time_filter == 'all':
         filter_label = "Historial Completo"
         # No agregamos filtro de fecha

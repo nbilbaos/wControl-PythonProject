@@ -2,40 +2,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 1. LEER DATOS DESDE EL HTML (Bridge Pattern)
     const dataContainer = document.getElementById('dashboardData');
-    const newAchievement = dataContainer.getAttribute('data-new-achievement');
-    const progressPct = parseFloat(dataContainer.getAttribute('data-progress')) || 0;
+    if (!dataContainer) return; // Seguridad
 
-    // 2. CONFIGURACIÓN DE MODALES (Edit & Delete)
+    const newAchievement = dataContainer.getAttribute('data-new-achievement');
+
+    // 2. LÓGICA DE MODALES (Edit & Delete) - VERSIÓN OPTIMIZADA
+
+    // A) Modal Editar
     const editModalEl = document.getElementById('editWeightModal');
     if (editModalEl) {
         editModalEl.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
+
+            // Extraer datos (URL directa desde Flask)
+            const url = button.getAttribute('data-url');
             const weight = button.getAttribute('data-weight');
             const date = button.getAttribute('data-date');
 
-            // Rellenar formulario
+            // Actualizar DOM
+            const form = editModalEl.querySelector('#editForm');
+            form.action = url;
+
             editModalEl.querySelector('#editWeightInput').value = weight;
             editModalEl.querySelector('#editDateInput').value = date;
-            editModalEl.querySelector('#editForm').action = "/edit_weight/" + id;
         });
     }
 
+    // B) Modal Eliminar
     const deleteModalEl = document.getElementById('deleteWeightModal');
     if (deleteModalEl) {
         deleteModalEl.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            deleteModalEl.querySelector('#deleteForm').action = "/delete_weight/" + id;
+
+            const url = button.getAttribute('data-url');
+            const date = button.getAttribute('data-date'); // Ahora pasamos la fecha formateada para mostrarla
+
+            // Actualizar DOM
+            const form = deleteModalEl.querySelector('#deleteForm');
+            form.action = url;
+
+            // Mostrar fecha para confirmar (Mejora de UX)
+            const dateText = deleteModalEl.querySelector('#deleteDateText');
+            if (dateText) dateText.innerText = date;
         });
     }
 
-    // 3. INICIALIZAR FECHA DE HOY
-    const dateInputs = document.querySelectorAll('#dateInput, #editDateInput');
-    const today = new Date().toISOString().split('T')[0];
-    dateInputs.forEach(input => {
-        if (!input.value) input.value = today;
-    });
+    // 3. INICIALIZAR FECHA DE HOY (Para el modal de "Nuevo Registro")
+    const dateInput = document.getElementById('dateInput');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+    }
 
     // 4. ANIMACIÓN DE MEDALLAS EXISTENTES
     const activeAchievements = document.querySelectorAll('.achievement-wrapper.active');
@@ -57,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const data = badgeData[newAchievement];
         if (data) {
-            // Rellenar Modal
             const modalTitle = document.getElementById('modalTitle');
             const modalIcon = document.getElementById('modalIcon');
 
@@ -67,11 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
             modalIcon.style.color = data.color;
             modalIcon.style.filter = `drop-shadow(0 0 15px ${data.color})`;
 
-            // Mostrar Modal (Bootstrap 5 JS)
             const achievementModal = new bootstrap.Modal(document.getElementById('achievementModal'));
             achievementModal.show();
 
-            // Lanzar Confetti
             launchConfetti();
         }
     }
