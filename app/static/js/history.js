@@ -1,37 +1,55 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // 1. FECHA DEL REPORTE
+    // 1. FECHA CABECERA (Para el reporte PDF)
     const dateHeader = document.getElementById('report-date-header');
     if (dateHeader) {
         dateHeader.innerText = new Date().toLocaleDateString('es-CL', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            year: 'numeric', month: 'long', day: 'numeric'
         });
     }
 
-    // 2. LÓGICA DE MODALES (Edit & Delete)
-    // Esto es mucho más eficiente: escuchamos el evento de apertura del modal
+    // 2. CONTROL DE FILTROS (Mostrar inputs si es Custom)
+    const timeFilter = document.getElementById('timeFilter');
+    const customInputs = document.getElementById('customDateInputs');
 
-    // A) Modal de Edición
+    function checkCustom() {
+        if (timeFilter && customInputs) {
+            customInputs.style.display = (timeFilter.value === 'custom') ? 'flex' : 'none';
+        }
+    }
+
+    if (timeFilter) {
+        timeFilter.addEventListener('change', checkCustom);
+        checkCustom(); // Ejecutar al inicio para verificar estado
+    }
+
+    // 3. GENERACIÓN DE PDF PROFESIONAL
+    const btnPDF = document.getElementById('btnDownloadPDF');
+    if (btnPDF) {
+        btnPDF.addEventListener('click', generateMedicalPDF);
+    }
+
+    // 4. LÓGICA DE MODALES (Edit & Delete)
+
+    // Modal Editar
     const editModal = document.getElementById('editModal');
     if (editModal) {
         editModal.addEventListener('show.bs.modal', function (event) {
-            // Botón que disparó el modal
             const button = event.relatedTarget;
-
-            // Extraer info de los data-attributes
             const url = button.getAttribute('data-url');
             const weight = button.getAttribute('data-weight');
             const date = button.getAttribute('data-date');
 
-            // Actualizar el contenido del modal
             const form = editModal.querySelector('#editForm');
-            form.action = url;
-            editModal.querySelector('#editWeightInput').value = weight;
-            editModal.querySelector('#editDateInput').value = date;
+            if (form) {
+                form.action = url;
+                editModal.querySelector('#editWeightInput').value = weight;
+                editModal.querySelector('#editDateInput').value = date;
+            }
         });
     }
 
-    // B) Modal de Eliminación
+    // Modal Eliminar
     const deleteModal = document.getElementById('deleteModal');
     if (deleteModal) {
         deleteModal.addEventListener('show.bs.modal', function (event) {
@@ -40,41 +58,39 @@ document.addEventListener('DOMContentLoaded', function() {
             const weight = button.getAttribute('data-weight');
             const date = button.getAttribute('data-date');
 
-            // Actualizar textos y acción del formulario
             const form = deleteModal.querySelector('#deleteForm');
-            form.action = url;
+            if (form) form.action = url;
+
             document.getElementById('deleteDateText').innerText = date;
             document.getElementById('deleteWeightText').innerText = weight + " kg";
         });
     }
-
-    // 3. GENERACIÓN DE PDF
-    const btnPDF = document.getElementById('btnDownloadPDF');
-    if (btnPDF) {
-        btnPDF.addEventListener('click', generateHistoryPDF);
-    }
 });
 
-function generateHistoryPDF() {
+function generateMedicalPDF() {
     const element = document.getElementById('history-report');
-
-    // Obtener nombre de usuario limpio
     const userDiv = document.getElementById('userData');
-    const userName = userDiv ? userDiv.getAttribute('data-username').replace(/\s+/g, '_') : 'Usuario';
+    const userName = userDiv ? userDiv.getAttribute('data-username').replace(/\s+/g, '_') : 'Paciente';
+
+    if (!element) return;
 
     const opt = {
-        margin:       [10, 10, 10, 10], // Márgenes en mm
-        filename:     `Historial_WeightControl_${userName}.pdf`,
+        margin:       [10, 10, 10, 10],
+        filename:     `Reporte_Clinico_${userName}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        html2canvas:  {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+        },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Agregar clase para ocultar botones durante la impresión
+    // Añadir clase para estilos de impresión
     element.classList.add('printing-mode');
 
     html2pdf().set(opt).from(element).save().then(() => {
-        // Restaurar vista normal
         element.classList.remove('printing-mode');
     }).catch(err => {
         console.error("Error generando PDF:", err);

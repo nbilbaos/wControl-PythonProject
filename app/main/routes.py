@@ -2,7 +2,7 @@ import pymongo
 from flask import render_template, session, current_app, request, url_for, flash ,redirect
 from app.decorators import login_required
 from bson.objectid import ObjectId
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from app.auth.forms import ProfileForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from app.main import main_bp
@@ -288,40 +288,102 @@ def delete_weight(entry_id):
     return redirect(url_for('main.dashboard'))
 
 
-# --- RUTA FALTANTE: HISTORIAL COMPLETO ---
+# --- HISTORIAL COMPLETO ---
 @main_bp.route('/history')
 @login_required
 def full_history():
     user_id = session['user_id']
     user = current_app.db.users.find_one({'_id': ObjectId(user_id)})
-
-    # 1. Traer TODO el historial sin límite
-    full_history = list(current_app.db.weight_entries.find(
-        {'user_id': user_id}
-    ).sort('recorded_date', pymongo.DESCENDING))
-
-    # 2. Cálculos (Variación e IMC) para la tabla completa
     profile = user.get('profile', {})
-    height_cm = profile.get('height')
-    height_m = (float(height_cm) / 100) if height_cm else None
 
-    for i in range(len(full_history)):
-        entry = full_history[i]
+    # 1. PARAMETROS DE FILTRO (Default: 3 meses)
+    time_filter = request.args.get('filter', '3m')  # 3m, 6m, all, custom
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
 
-        # Variación
-        if i < len(full_history) - 1:
-            entry['variation'] = round(entry['weight'] - full_history[i + 1]['weight'], 1)
+    query = {'user_id': user_id}
+
+    # Lógica de fechas
+    now = datetime.now()
+    filter_label = "Últimos 3 Meses"  # Para el título del PDF
+
+    if time_filter == '3m':
+        query['recorded_date'] = {'$gte': now - timedelta(days=90)}
+        filter_label = "Últimos 3 Meses"
+    elif time_filter == '6m':
+        query['recorded_date'] = {'$gte': now - timedelta(days=180)}
+        filter_label = "Últimos 6 Meses"
+    elif time_filter == 'custom' and start_date_str:
+        try:
+            s_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            e_date = datetime.strptime(end_date_str, '%Y-%m-%d') if end_date_str else now
+            # Ajustamos el final del día para incluir el registro de ese día
+            e_date = e_date.replace(hour=23, minute=59)
+            query['recorded_date'] = {'$gte': s_date, '$lte': e_date}
+            filter_label = f"Del {start_date_str} al {end_date_str}"
+        except:
+            pass  # Fallback a todo si hay error
+    elif time_filter == 'all':
+        filter_label = "Historial Completo"
+        # No agregamos filtro de fecha
+
+    # 2. CONSULTA (Ordenada Descendente: Nuevo -> Viejo)
+    # Importante: Para calcular variaciones necesitamos el registro ANTERIOR al periodo seleccionado
+    # pero para simplificar, calcularemos variaciones sobre lo visible.
+    cursor = current_app.db.weight_entries.find(query).sort('recorded_date', pymongo.DESCENDING)
+    history = list(cursor)
+
+    # 3. ESTADÍSTICAS CLÍNICAS (Calculadas sobre los datos FILTRADOS)
+    stats = {
+        'current_weight': 0,
+        'start_weight_period': 0,
+        'total_change': 0,
+        'avg_monthly_change': 0,
+        'days_elapsed': 0,
+        'bmi': 0,
+        'height': profile.get('height', 0)
+    }
+
+    if history:
+        stats['current_weight'] = history[0]['weight']  # El más reciente (index 0)
+        stats['start_weight_period'] = history[-1]['weight']  # El más antiguo del periodo
+        stats['total_change'] = round(stats['current_weight'] - stats['start_weight_period'], 1)
+
+        # Calcular días entre el primer y último registro del periodo
+        delta = history[0]['recorded_date'] - history[-1]['recorded_date']
+        stats['days_elapsed'] = delta.days
+
+        # Promedio Mensual (Aprox 30.44 días por mes)
+        if stats['days_elapsed'] > 30:
+            months = stats['days_elapsed'] / 30.44
+            stats['avg_monthly_change'] = round(stats['total_change'] / months, 2)
+        else:
+            stats['avg_monthly_change'] = stats['total_change']  # Si es menos de un mes, es el cambio total
+
+        # IMC Actual
+        if stats['height']:
+            h_m = float(stats['height']) / 100
+            stats['bmi'] = round(stats['current_weight'] / (h_m ** 2), 1)
+
+    # 4. PROCESAR TABLA (Variaciones fila a fila)
+    for i in range(len(history)):
+        entry = history[i]
+        # IMC por registro
+        if stats['height']:
+            h_m = float(stats['height']) / 100
+            entry['imc'] = round(entry['weight'] / (h_m ** 2), 1)
+
+        # Variación respecto al registro anterior (que en la lista es i+1 porque está invertida)
+        if i < len(history) - 1:
+            entry['variation'] = round(entry['weight'] - history[i + 1]['weight'], 1)
         else:
             entry['variation'] = None
 
-        # IMC
-        if height_m:
-            entry['imc'] = round(entry['weight'] / (height_m ** 2), 1)
-        else:
-            entry['imc'] = None
-
-    # 3. Renderizar la plantilla específica del historial
-    return render_template('main/history.html', weight_history=full_history)
+    return render_template('main/history.html',
+                           weight_history=history,
+                           stats=stats,
+                           filter_label=filter_label,
+                           current_filter=time_filter)
 
 @main_bp.route('/privacidad')
 def privacidad():

@@ -30,3 +30,65 @@ body {
     transform: translateY(-3px);
     border-color: #0d6efd !important;
 }
+
+/* app/static/css/history.css */
+
+/* --- Estilos Generales --- */
+.ls-1 { letter-spacing: 1px; }
+
+/* Tabla Slim */
+.report-table thead th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.report-table tbody td {
+    font-size: 0.9rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+}
+
+/* Tarjeta de Resumen */
+.medical-summary {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* --- MODO IMPRESIÓN (PDF) --- */
+.printing-mode {
+    /* Quitar sombras y bordes redondeados para que parezca papel */
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background-color: white !important;
+}
+
+.printing-mode .medical-summary {
+    /* Fondo blanco en impresión para ahorrar tinta y verse limpio */
+    background-color: #fff !important;
+    border: 1px solid #000 !important; /* Borde negro fino */
+}
+
+.printing-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
+    /* Quitar el gris de las filas impares para un look más "fax/médico" */
+    --bs-table-accent-bg: transparent !important;
+}
+
+.printing-mode th,
+.printing-mode td {
+    /* Texto negro puro para legibilidad */
+    color: #000 !important;
+    border-color: #000 !important;
+}
+
+.printing-mode .no-print {
+    display: none !important;
+}
+
+.printing-mode .printing-footer {
+    display: block !important; /* Mostrar pie de página solo en PDF */
+}
