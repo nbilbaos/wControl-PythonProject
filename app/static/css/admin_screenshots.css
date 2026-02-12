@@ -1,0 +1,23 @@
+/* app/static/css/admin_screenshots.css */
+
+/* Efecto de elevación al pasar el mouse por el botón de eliminar */
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Ajustes para la previsualización de imagen */
+.card-img-top {
+    height: 100%;
+    width: 100%;
+}
+
+/* Badge de estado (Local/Externa) */
+.badge {
+    font-size: 0.75rem;
+    backdrop-filter: blur(4px);
+}

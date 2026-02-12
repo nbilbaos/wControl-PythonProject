@@ -24,46 +24,6 @@ def panel():
 
     return render_template('admin/panel.html')
 
-@admin_bp.route('/manage_screenshots', methods=['GET', 'POST'])
-@login_required
-def manage_screenshots():
-    if not session.get('is_admin'):
-        return redirect(url_for('main.dashboard'))
-
-    if request.method == 'POST':
-        file = request.files.get('screenshot')
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-
-            # --- MEJORA: RUTA ABSOLUTA Y CREACIÓN AUTOMÁTICA ---
-
-            # 1. Construimos la ruta absoluta usando la ubicación real de la app
-            # Esto evita errores de "ruta no encontrada" en servidores Linux/Render
-            base_path = os.path.join(current_app.root_path, 'static', 'uploads', 'screenshots')
-
-            # 2. Verificamos si existe, y si no, la creamos (incluyendo subcarpetas)
-            if not os.path.exists(base_path):
-                os.makedirs(base_path, exist_ok=True)
-                print(f"Directorio creado: {base_path}")  # Log para tu consola de Render
-
-            # 3. Guardamos el archivo
-            save_path = os.path.join(base_path, filename)
-            file.save(save_path)
-
-            # ---------------------------------------------------
-
-            # Guardar referencia en MongoDB
-            current_app.db.site_content.insert_one({
-                'type': 'screenshot',
-                'url': filename,
-                'description': request.form.get('description'),
-                'created_at': datetime.now(timezone.utc)
-            })
-            flash('Imagen subida con éxito.', 'success')
-
-    screenshots = list(current_app.db.site_content.find({'type': 'screenshot'}))
-    return render_template('admin/manage_screenshots.html', screenshots=screenshots)
-
 @admin_bp.route('/delete_screenshot/<id>', methods=['POST'])
 @login_required
 def delete_screenshot(id):
@@ -217,3 +177,55 @@ def manage_background():
     current_bg = current_app.db.site_content.find_one({'type': 'auth_background'})
 
     return render_template('admin/manage_background.html', current_bg=current_bg)
+
+
+# En app/admin/routes.py
+
+@admin_bp.route('/manage_screenshots', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def manage_screenshots():
+    # 1. LÓGICA POST (Procesar subida o URL)
+    if request.method == 'POST':
+        description = request.form.get('description')
+        external_url = request.form.get('external_url')
+        filename = None
+
+        # A) ¿Es URL Externa?
+        if external_url and external_url.strip():
+            filename = external_url.strip()
+
+        # B) ¿Es Archivo Local?
+        elif 'screenshot' in request.files:
+            file = request.files['screenshot']
+            if file.filename != '' and allowed_file(file.filename):
+                safe_name = secure_filename(file.filename)
+                # Timestamp para evitar duplicados
+                filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{safe_name}"
+
+                # Ruta absoluta segura
+                upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'screenshots')
+                os.makedirs(upload_folder, exist_ok=True)
+
+                file.save(os.path.join(upload_folder, filename))
+            else:
+                flash('Archivo inválido o no permitido.', 'warning')
+                return redirect(url_for('admin.manage_screenshots'))
+
+        # C) Guardar en BD si tenemos un filename/url válido
+        if filename:
+            current_app.db.site_content.insert_one({
+                'type': 'screenshot',
+                'url': filename,
+                'description': description,
+                'created_at': datetime.now(timezone.utc)
+            })
+            flash('Imagen agregada exitosamente.', 'success')
+        else:
+            flash('Debes ingresar una URL o subir un archivo.', 'danger')
+
+        return redirect(url_for('admin.manage_screenshots'))
+
+    # 2. LÓGICA GET (Mostrar página)
+    screenshots = list(current_app.db.site_content.find({'type': 'screenshot'}))
+    return render_template('admin/manage_screenshots.html', screenshots=screenshots)

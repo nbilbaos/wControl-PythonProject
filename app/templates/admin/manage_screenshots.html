@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_screenshots.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -11,22 +15,56 @@
 
     <div class="card shadow-sm border-0 mb-5">
         <div class="card-header bg-white py-3">
-            <h5 class="mb-0 fw-bold text-success"><i class="bi bi-cloud-upload me-2"></i> Subir Nueva Captura</h5>
+            <h5 class="mb-0 fw-bold text-success"><i class="bi bi-cloud-plus me-2"></i> Agregar Nueva Imagen</h5>
         </div>
         <div class="card-body p-4">
-            <form action="" method="POST" enctype="multipart/form-data">
-                <div class="row align-items-end g-3">
-                    <div class="col-md-5">
-                        <label class="form-label fw-bold small">Seleccionar Imagen (PNG, JPG)</label>
-                        <input type="file" name="screenshot" class="form-control" required accept=".png, .jpg, .jpeg">
+
+            <ul class="nav nav-tabs mb-4" id="imageTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-bold" id="url-tab" data-bs-toggle="tab" data-bs-target="#url-pane" type="button" role="tab">
+                        <i class="bi bi-link-45deg"></i> URL Externa (Recomendado)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-bold" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-pane" type="button" role="tab">
+                        <i class="bi bi-file-earmark-image"></i> Subir Archivo (Local)
+                    </button>
+                </li>
+            </ul>
+
+            <form action="{{ url_for('admin.manage_screenshots') }}" method="POST" enctype="multipart/form-data">
+                <div class="row g-3">
+
+                    <div class="col-md-8">
+                        <div class="tab-content" id="myTabContent">
+
+                            <div class="tab-pane fade show active" id="url-pane" role="tabpanel">
+                                <label class="form-label fw-bold small text-muted">Enlace directo a la imagen</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-globe"></i></span>
+                                    <input type="url" name="external_url" id="inputUrl" class="form-control" placeholder="https://ejemplo.com/imagen.jpg" required>
+                                </div>
+                                <div class="form-text">Usa servicios como Imgur, Cloudinary o Google Drive (enlace directo).</div>
+                            </div>
+
+                            <div class="tab-pane fade" id="file-pane" role="tabpanel">
+                                <label class="form-label fw-bold small text-muted">Seleccionar archivo del dispositivo</label>
+                                <input type="file" name="screenshot" id="inputFile" class="form-control" accept=".png, .jpg, .jpeg">
+                                <div class="form-text text-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> En servidores gratuitos como Render, estos archivos se borran al reiniciar.
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-5">
+
+                    <div class="col-md-4">
                         <label class="form-label fw-bold small">Descripción (Alt Text)</label>
-                        <input type="text" name="description" class="form-control" placeholder="Ej: Vista del Dashboard Móvil" required>
+                        <input type="text" name="description" class="form-control" placeholder="Ej: Dashboard Vista Móvil" required>
                     </div>
-                    <div class="col-md-2 d-grid">
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-upload"></i> Subir
+
+                    <div class="col-12 text-end mt-4 border-top pt-3">
+                        <button type="submit" class="btn btn-success px-4 rounded-pill">
+                            <i class="bi bi-save me-1"></i> Guardar Imagen
                         </button>
                     </div>
                 </div>
@@ -35,29 +73,33 @@
     </div>
 
     <h5 class="fw-bold mb-3">Imágenes Activas en Carrusel</h5>
-    
+
     {% if screenshots %}
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for screen in screenshots %}
             <div class="col">
                 <div class="card h-100 shadow-sm border-0 overflow-hidden">
-                    <div class="ratio ratio-16x9 bg-light">
-                        <img src="{{ url_for('static', filename='uploads/screenshots/' + screen.url) }}" 
-                             class="card-img-top object-fit-cover" 
-                             alt="{{ screen.description }}">
+                    <div class="ratio ratio-16x9 bg-light position-relative">
+                        {% if screen.url.startswith('http') %}
+                            <img src="{{ screen.url }}" class="card-img-top object-fit-cover" alt="{{ screen.description }}" onerror="this.src='https://placehold.co/600x400?text=Error+Carga'">
+                            <span class="position-absolute top-0 end-0 badge bg-primary m-2 shadow-sm">Externa</span>
+                        {% else %}
+                            <img src="{{ url_for('static', filename='uploads/screenshots/' + screen.url) }}" class="card-img-top object-fit-cover" alt="{{ screen.description }}">
+                            <span class="position-absolute top-0 end-0 badge bg-secondary m-2 shadow-sm">Local</span>
+                        {% endif %}
                     </div>
-                    
+
                     <div class="card-body">
-                        <h6 class="card-title fw-bold text-dark">{{ screen.description }}</h6>
+                        <h6 class="card-title fw-bold text-dark text-truncate">{{ screen.description }}</h6>
                         <p class="card-text text-muted small">
-                            <i class="bi bi-calendar-event me-1"></i> 
-                            Subida el: {{ screen.created_at.strftime('%d-%m-%Y') }}
+                            <i class="bi bi-calendar-event me-1"></i>
+                            {{ screen.created_at.strftime('%d-%m-%Y') }}
                         </p>
                     </div>
-                    
+
                     <div class="card-footer bg-white border-top-0 d-grid pb-3">
-                        <form action="{{ url_for('admin.delete_screenshot', id=screen._id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar esta imagen? Desaparecerá del inicio.');">
-                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <form action="{{ url_for('admin.delete_screenshot', id=screen._id) }}" method="POST" onsubmit="return confirm('¿Eliminar esta imagen?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 hover-shadow">
                                 <i class="bi bi-trash"></i> Eliminar
                             </button>
                         </form>
@@ -67,11 +109,15 @@
             {% endfor %}
         </div>
     {% else %}
-        <div class="alert alert-info text-center py-5 rounded-4 border-0 shadow-sm">
-            <i class="bi bi-info-circle display-4 mb-3 d-block text-info"></i>
-            <p class="lead mb-0">No hay capturas subidas. La página de inicio mostrará la imagen por defecto.</p>
+        <div class="alert alert-light text-center py-5 rounded-4 border shadow-sm">
+            <i class="bi bi-images display-4 mb-3 d-block text-secondary opacity-50"></i>
+            <p class="lead mb-0 text-muted">No hay imágenes configuradas.</p>
         </div>
     {% endif %}
 
 </div>
+
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/admin_screenshots.js') }}"></script>
 {% endblock %}

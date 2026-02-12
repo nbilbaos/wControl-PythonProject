@@ -14,19 +14,52 @@
     </div>
     <div class="col-lg-6 mt-5 mt-lg-0">
         <div id="appCarousel" class="carousel slide shadow-lg rounded-4 overflow-hidden" data-bs-ride="carousel">
+
+            {% if screenshots and screenshots|length > 1 %}
+            <div class="carousel-indicators">
+                {% for screen in screenshots %}
+                    <button type="button" data-bs-target="#appCarousel" data-bs-slide-to="{{ loop.index0 }}"
+                            class="{% if loop.first %}active{% endif %}" aria-current="true"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <div class="carousel-inner">
                 {% if screenshots %}
                     {% for screen in screenshots %}
-                    <div class="carousel-item {% if loop.first %}active{% endif %}">
-                        <img src="{{ url_for('static', filename='uploads/screenshots/' + screen.url) }}" class="d-block w-100" alt="{{ screen.description }}">
-                    </div>
+                        <div class="carousel-item {% if loop.first %}active{% endif %}">
+                            <div class="ratio ratio-16x9 bg-light">
+                                {% if screen.url.startswith('http') %}
+                                    <img src="{{ screen.url }}" class="d-block w-100 object-fit-cover" alt="{{ screen.description }}">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='uploads/screenshots/' + screen.url) }}" class="d-block w-100 object-fit-cover" alt="{{ screen.description }}">
+                                {% endif %}
+                            </div>
+
+                            <div class="carousel-caption d-none d-md-block p-2 rounded-3" style="background: rgba(0,0,0,0.6); bottom: 20px;">
+                                <h6 class="mb-0 text-white">{{ screen.description }}</h6>
+                            </div>
+                        </div>
                     {% endfor %}
                 {% else %}
                     <div class="carousel-item active">
-                        <img src="https://via.placeholder.com/800x500?text=Dashboard+Preview" class="d-block w-100" alt="Preview">
+                        <div class="ratio ratio-16x9 bg-secondary">
+                            <img src="https://via.placeholder.com/800x450?text=Vista+Previa+App" class="d-block w-100 object-fit-cover" alt="Preview">
+                        </div>
                     </div>
                 {% endif %}
             </div>
+
+            {% if screenshots and screenshots|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#appCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#appCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+            {% endif %}
         </div>
     </div>
 </div>
