@@ -38,10 +38,10 @@
 
     {% set bmi_color = 'bg-light text-dark' %}
     {% if current_bmi %}
-        {% if current_bmi < 18.5 %}{% set bmi_color = 'bg-info bg-opacity-10 text-info' %}{% endif %}
-        {% if current_bmi >= 18.5 and current_bmi < 25 %}{% set bmi_color = 'bg-success bg-opacity-10 text-success' %}{% endif %}
-        {% if current_bmi >= 25 and current_bmi < 30 %}{% set bmi_color = 'bg-warning bg-opacity-10 text-warning' %}{% endif %}
-        {% if current_bmi >= 30 %}{% set bmi_color = 'bg-danger bg-opacity-10 text-danger' %}{% endif %}
+        {% if current_bmi < 18.5 %}{% set bmi_color = 'text-info' %}{% endif %}
+        {% if current_bmi >= 18.5 and current_bmi < 25 %}{% set bmi_color = 'text-success' %}{% endif %}
+        {% if current_bmi >= 25 and current_bmi < 30 %}{% set bmi_color = 'text-warning' %}{% endif %}
+        {% if current_bmi >= 30 %}{% set bmi_color = 'text-danger' %}{% endif %}
     {% endif %}
 
     <div class="col-md-4">
@@ -50,7 +50,7 @@
                 <div class="bg-white bg-opacity-50 p-2 rounded-3 me-3">
                     <i class="bi bi-heart-pulse fs-4"></i>
                 </div>
-                <span class="text-uppercase fw-bold small opacity-75">IMC Actual</span>
+                <span class="text-uppercase fw-bold small ">IMC Actual</span>
             </div>
             <h1 class="fw-bold mb-0">{{ current_bmi }}</h1>
         </div>
@@ -118,59 +118,19 @@
 {% endif %}
 
 <div class="card shadow mb-3">
-    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h6 class="m-0 fw-bold">Evolución de Peso</h6>
+    <div class="card-body py-3 d-flex flex-row align-items-center justify-content-between">
+        <h5 class="m-0 fw-bold">Evolución de Peso</h5>
         <div class="dropdown no-arrow">
             <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#chartSettingsModal" class="text-secondary">
                 <i class="bi bi-gear-fill fs-5"></i>
             </a>
         </div>
     </div>
-    <div class="card-body">
+    <div class="card-body mb-3">
         <div class="chart-area" style="position: relative; height: 400px; width: 100%;">
             <canvas id="weightChart"></canvas>
         </div>
     </div>
-</div>
-
-<div class="modal fade" id="chartSettingsModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-
-        <h5 class="modal-title">Configurar Gráfico</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="chartOptionsForm">
-            <div class="mb-3">
-                <label class="form-label">Rango de Tiempo</label>
-                <select class="form-select" id="timeFilter" onchange="toggleCustomDate()">
-                    <option value="1m">Último Mes</option>
-                    <option value="3m">Últimos 3 Meses</option>
-                    <option value="all">Todo el historial (con Tendencia)</option>
-                    <option value="custom">Rango Personalizado</option>
-                </select>
-            </div>
-
-            <div id="customDateRange" style="display:none;">
-                <div class="mb-3">
-                    <label class="form-label">Desde:</label>
-                    <input type="date" class="form-control" id="startDate">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Hasta:</label>
-                    <input type="date" class="form-control" id="endDate">
-                </div>
-            </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" onclick="updateChart()">Aplicar</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="card shadow mt-4 mb-3">
@@ -227,56 +187,95 @@
     </div>
 </div>
 
-<div class="card shadow mb-3 overflow-hidden">
-    <div class="card-header bg-white py-3">
-        <h5 class="fw-bold mb-0">Historial Reciente</h5>
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
+    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold text-dark mb-0">Historial Reciente</h5>
+        <a href="{{ url_for('main.full_history') }}" class="text-decoration-none small fw-bold text-primary">
+            Ver todo <i class="bi bi-arrow-right ms-1"></i>
+        </a>
     </div>
+
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+        <table class="table table-hover align-middle mb-0 custom-table">
+            <thead class="bg-light text-secondary small text-uppercase">
                 <tr>
-                    <th class="ps-4">Fecha</th>
-                    <th>Peso</th>
-                    <th>Variación</th>
-                    <th>IMC</th>
-                    <th class="text-end pe-4">Acciones</th>
-                </tr>
+                    <th class="ps-4 py-3 fw-bold border-0">Fecha</th>
+                    <th class="py-3 fw-bold border-0">Peso</th>
+                    <th class="py-3 fw-bold border-0">Variación</th>
+                    <th class="py-3 fw-bold border-0">IMC</th>
+                    <th class="text-end pe-4 py-3 fw-bold border-0"></th> </tr>
             </thead>
             <tbody>
                 {% for entry in weight_history %}
-                <tr>
-                    <td class="ps-4">{{ entry.recorded_date.strftime('%d-%m-%Y') }}</td>
-                    <td class="fw-bold">{{ entry.weight }} kg</td>
+                <tr class="position-relative">
+                    <td class="ps-4 py-1">
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold text-dark">{{ entry.recorded_date.strftime('%d %b') }}</span>
+                            <span class="small text-muted" style="font-size: 0.75rem;">{{ entry.recorded_date.strftime('%Y') }}</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="fw-bolder h6 mb-0 text-primary">{{ entry.weight }} <small class="text-muted fw-normal">kg</small></span>
+                    </td>
+
                     <td>
                         {% if entry.variation is not none %}
-                            <span class="badge bg-opacity-10
-                                {% if entry.variation < 0 %}bg-success text-success{% elif entry.variation > 0 %}bg-danger text-danger{% else %}bg-secondary text-secondary{% endif %}">
-                                {{ entry.variation|abs if entry.variation < 0 else entry.variation }}
-                                <i class="bi {% if entry.variation < 0 %}bi-arrow-down{% elif entry.variation > 0 %}bi-arrow-up{% else %}{% endif %}"></i>
-                            </span>
-                        {% else %}<small class="text-muted">Inicio</small>{% endif %}
+                            {% if entry.variation < 0 %}
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3 py-2 border border-success border-opacity-10">
+                                    <i class="bi bi-arrow-down-short me-1"></i>{{ entry.variation|abs }}
+                                </span>
+                            {% elif entry.variation > 0 %}
+                                <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3 py-2 border border-danger border-opacity-10">
+                                    <i class="bi bi-arrow-up-short me-1"></i>{{ entry.variation }}
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2">
+                                    <i class="bi bi-dash me-1"></i>0.0
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge rounded-pill bg-light text-muted border px-3">Inicio</span>
+                        {% endif %}
                     </td>
-                    <td>{{ entry.imc if entry.imc else '--' }}</td>
+
+                    <td>
+                        {% if entry.imc %}
+                            <div class="d-flex align-items-center">
+                                <span class="d-inline-block rounded-circle me-2"
+                                      style="width: 8px; height: 8px; background-color:
+                                      {% if entry.imc < 18.5 %}#17a2b8
+                                      {% elif entry.imc < 25 %}#198754
+                                      {% elif entry.imc < 30 %}#ffc107
+                                      {% else %}#dc3545{% endif %};">
+                                </span>
+                                <span class="fw-bold text-dark">{{ entry.imc }}</span>
+                            </div>
+                        {% else %}
+                            <span class="text-muted small">--</span>
+                        {% endif %}
+                    </td>
+
                     <td class="text-end pe-4">
-                        <div class="d-flex justify-content-end gap-2">
-                            <button class="btn btn-sm btn-light text-primary"
+                        <div class="btn-group">
+                            <button class="btn btn-icon btn-sm text-secondary hover-primary"
                                     data-bs-toggle="modal"
                                     data-bs-target="#editWeightModal"
                                     data-url="{{ url_for('main.edit_weight', entry_id=entry._id) }}"
                                     data-weight="{{ entry.weight }}"
                                     data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}"
                                     title="Editar">
-                                <i class="bi bi-pencil-square"></i>
+                                <i class="bi bi-pencil-square fs-6"></i>
                             </button>
 
-                            <button class="btn btn-sm btn-light text-danger"
+                            <button class="btn btn-icon btn-sm text-secondary hover-danger ms-2"
                                     data-bs-toggle="modal"
                                     data-bs-target="#deleteWeightModal"
                                     data-url="{{ url_for('main.delete_weight', entry_id=entry._id) }}"
                                     data-weight="{{ entry.weight }}"
                                     data-date="{{ entry.recorded_date.strftime('%d/%m/%Y') }}"
                                     title="Eliminar">
-                                <i class="bi bi-trash"></i>
+                                <i class="bi bi-trash fs-6"></i>
                             </button>
                         </div>
                     </td>

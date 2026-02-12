@@ -106,3 +106,51 @@
 .table-responsive {
     border-radius: 0.5rem;
 }
+/* Tabla personalizada */
+.custom-table thead th {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background-color: #f8f9fa; /* Fondo gris muy suave para cabecera */
+}
+
+/* Efecto Hover en la fila */
+.custom-table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #fdfdfd; /* Cambia ligeramente el fondo */
+    transform: translateY(-1px); /* Efecto sutil de elevación */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    z-index: 1;
+}
+
+/* Botones de acción personalizados */
+.btn-icon {
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background-color: transparent;
+    border: 1px solid transparent;
+}
+
+.btn-icon:hover {
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Colores específicos para hover */
+.hover-primary:hover {
+    color: #0d6efd !important;
+    border-color: #e9ecef;
+}
+
+.hover-danger:hover {
+    color: #dc3545 !important;
+    border-color: #ffe6e6;
+    background-color: #fff5f5;
+}
