@@ -1,179 +1,142 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <style>
+
+        /* Ajuste específico para el registro (tarjeta más ancha) */
+        .glass-card {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+            color: #6c757d;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 0.5rem;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-<style>
-    /* Estilos compartidos de autenticación (Glassmorphism) */
-    .auth-container {
-        min-height: 100vh;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-image: url('{{ background_url }}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 100;
-        padding: 20px; /* Un poco de margen en móviles */
-    }
-
-    .auth-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.6); /* Un poco más oscuro para leer mejor */
-        z-index: 1;
-    }
-
-    .glass-card {
-        background: rgba(255, 255, 255, 0.90); /* Menos transparente para mejor lectura */
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 20px;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        position: relative;
-        z-index: 2;
-        overflow: hidden;
-    }
-
-    .form-control, .form-select {
-        border-radius: 8px;
-        padding: 10px 12px;
-        border: 1px solid #ced4da;
-    }
-
-    .form-control:focus, .form-select:focus {
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-        border-color: #0d6efd;
-    }
-
-    .brand-logo {
-        width: 50px;
-        height: 50px;
-        background: #198754; /* Verde para registro */
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        margin: 0 auto 15px;
-    }
-</style>
-
 <div class="auth-container">
-    <div class="auth-overlay"></div>
-
-    <div class="col-12 col-md-8 col-lg-5">
+    <div class="col-12 col-md-10 col-lg-8">
         <div class="glass-card p-4 p-md-5">
 
-            <div class="text-center mb-4">
-                <div class="brand-logo shadow-sm">
+            <div class="text-center mb-4 position-relative">
+                <a href="{{ url_for('main.index') }}" class="position-absolute start-0 top-0 text-decoration-none text-muted small hover-link" title="Volver al Inicio">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </a>
+
+                <div class="brand-logo brand-logo-register mx-auto mb-3" style="width: 60px; height: 60px; border-radius: 18px; display: flex; align-items: center; justify-content: center; color: white; font-size: 28px;">
                     <i class="bi bi-person-plus-fill"></i>
                 </div>
+
                 <h3 class="fw-bold text-dark mb-1">Crear Cuenta</h3>
-                <p class="text-muted small">Únete para comenzar tu cambio.</p>
+                <p class="text-muted small">Completa tu perfil para comenzar.</p>
             </div>
 
             <form action="" method="POST" novalidate>
                 {{ form.hidden_tag() }}
 
-                <div class="row g-3 mb-3">
-                    <div class="col-12">
-                        <label class="form-label small fw-bold text-muted">Nombre Completo</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
-                            {{ form.name(class="form-control border-start-0", placeholder="Ej: Juan Pérez") }}
-                        </div>
-                        {% for error in form.name.errors %}
-                            <span class="text-danger extra-small">{{ error }}</span>
-                        {% endfor %}
-                    </div>
+                <div class="mb-4">
+                    <h6 class="section-title">Datos de Acceso</h6>
 
-                    <div class="col-12">
-                        <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
-                            {{ form.email(class="form-control border-start-0", placeholder="nombre@ejemplo.com") }}
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Nombre Completo</label>
+                            <div class="input-group">
+                                <span class="input-group-text rounded-start-3"><i class="bi bi-person"></i></span>
+                                {{ form.name(class="form-control rounded-end-3", placeholder="Ej: Juan Pérez", required=True) }}
+                            </div>
+                            {% for error in form.name.errors %}
+                                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle"></i> {{ error }}</div>
+                            {% endfor %}
                         </div>
-                        {% for error in form.email.errors %}
-                            <span class="text-danger extra-small">{{ error }}</span>
-                        {% endfor %}
+
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text rounded-start-3"><i class="bi bi-envelope"></i></span>
+                                {{ form.email(class="form-control rounded-end-3", placeholder="nombre@ejemplo.com", required=True, autocomplete="email") }}
+                            </div>
+                            {% for error in form.email.errors %}
+                                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle"></i> {{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text rounded-start-3"><i class="bi bi-lock"></i></span>
+                                {{ form.password(class="form-control rounded-end-3", placeholder="Mín. 6 caracteres", required=True, autocomplete="new-password") }}
+                            </div>
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Confirmar</label>
+                            <div class="input-group">
+                                <span class="input-group-text rounded-start-3"><i class="bi bi-check2-circle"></i></span>
+                                {{ form.confirm_password(class="form-control rounded-end-3", placeholder="Repetir clave", required=True, autocomplete="new-password") }}
+                            </div>
+                            {% for error in form.confirm_password.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
 
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Contraseña</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-lock"></i></span>
-                            {{ form.password(class="form-control border-start-0", placeholder="Mín. 8 caracteres") }}
+                <div class="mb-4">
+                    <h6 class="section-title text-primary border-success border-opacity-25">Perfil Físico Inicial</h6>
+                    <div class="bg-light p-3 rounded-3 border border-light-subtle">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Género</label>
+                                {{ form.gender(class="form-select form-select-sm", required=True) }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Altura (cm)</label>
+                                <div class="input-group input-group-sm">
+                                    {{ form.height(class="form-control", placeholder="170", type="number", min="50", max="300", required=True) }}
+                                    <span class="input-group-text">cm</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-muted">Peso (kg)</label>
+                                <div class="input-group input-group-sm">
+                                    {{ form.weight(class="form-control", placeholder="70.5", type="number", step="0.1", min="20", max="500", required=True) }}
+                                    <span class="input-group-text">kg</span>
+                                </div>
+                            </div>
                         </div>
-                        {% for error in form.password.errors %}
-                            <span class="text-danger extra-small">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Confirmar</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-check2-circle"></i></span>
-                            {{ form.confirm_password(class="form-control border-start-0", placeholder="Repetir clave") }}
+                        <div class="mt-2 d-flex align-items-center text-muted">
+                            <i class="bi bi-info-circle me-2" style="font-size: 0.8rem;"></i>
+                            <span class="small" style="font-size: 0.75rem; line-height: 1.2;">
+                                Estos datos son obligatorios para calcular tu IMC y generar tu primer reporte.
+                            </span>
                         </div>
-                        {% for error in form.confirm_password.errors %}
-                            <span class="text-danger extra-small">{{ error }}</span>
-                        {% endfor %}
                     </div>
                 </div>
 
-                <div class="bg-light bg-opacity-50 p-3 rounded-3 mb-4 border border-white">
-                    <h6 class="small fw-bold text-primary mb-3"><i class="bi bi-sliders me-1"></i> Perfil Inicial (Opcional)</h6>
-                    <div class="row g-2">
-                        <div class="col-4">
-                            <label class="form-label extra-small text-muted mb-1">Género</label>
-                            {{ form.gender(class="form-select form-select-sm") }}
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label extra-small text-muted mb-1">Altura (cm)</label>
-                            {{ form.height(class="form-control form-control-sm", placeholder="170") }}
-                        </div>
-                        <div class="col-4">
-                            <label class="form-label extra-small text-muted mb-1">Peso (kg)</label>
-                            {{ form.weight(class="form-control form-control-sm", placeholder="70.5") }}
-                        </div>
-                    </div>
-                    <small class="text-muted fst-italic mt-2 d-block" style="font-size: 0.7rem;">
-                        * Estos datos nos ayudan a calcular tu IMC inicial.
-                    </small>
-                </div>
-
-                <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm">
-                        Registrarse
+                <div class="d-grid mb-4">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg hover-scale">
+                        Completar Registro
                     </button>
                 </div>
             </form>
 
-            <div class="text-center">
+            <div class="text-center pt-2 border-top">
                 <span class="text-muted small">¿Ya tienes cuenta?</span>
-                <a href="{{ url_for('auth.login') }}" class="fw-bold text-success text-decoration-none ms-1">Iniciar Sesión</a>
-            </div>
-
-            <div class="text-center mt-3">
-                 <a href="{{ url_for('main.index') }}" class="text-decoration-none text-muted extra-small hover-link">
-                    <i class="bi bi-arrow-left me-1"></i> Volver al Inicio
-                </a>
+                <a href="{{ url_for('auth.login') }}" class="fw-bold text-primary text-decoration-none ms-1">Iniciar Sesión</a>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .extra-small { font-size: 0.75rem; }
-</style>
 {% endblock %}

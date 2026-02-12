@@ -1,35 +1,45 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField, FloatField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, FloatField, IntegerField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, Optional, NumberRange
 
-
 class RegistrationForm(FlaskForm):
-    name = StringField('Nombre Completo',
-                       validators=[DataRequired(message="El nombre es obligatorio")])
-
-    email = StringField('Correo Electrónico',
-                        validators=[DataRequired(), Email(message="Ingresa un email válido")])
-
-    # Seguridad: Mínimo 8 caracteres
-    password = PasswordField('Contraseña', validators=[
-        DataRequired(),
-        Length(min=8, message="La contraseña debe tener al menos 8 caracteres")
+    name = StringField('Nombre', validators=[
+        DataRequired(message="El nombre es obligatorio"),
+        Length(min=2, max=50)
     ])
 
-    # Seguridad: Confirmar contraseña para evitar errores de dedo
+    email = StringField('Correo Electrónico', validators=[
+        DataRequired(message="El correo es obligatorio"),
+        Email(message="Ingresa un correo válido")
+    ])
+
+    password = PasswordField('Contraseña', validators=[
+        DataRequired(message="La contraseña es obligatoria"),
+        Length(min=6, message="Mínimo 6 caracteres")
+    ])
+
     confirm_password = PasswordField('Confirmar Contraseña', validators=[
         DataRequired(),
-        EqualTo('password', message='Las contraseñas no coinciden')
+        EqualTo('password', message='Las contraseñas deben coincidir')
     ])
 
+    # NUEVO: Campos obligatorios para perfil inicial
     gender = SelectField('Género', choices=[
-        ('', 'Prefiero no decir / Completar después'),
-        ('male', 'Hombre'),
-        ('female', 'Mujer')
-    ], validators=[Optional()])
+        ('', 'Selecciona...'),
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
+        ('O', 'Otro')
+    ], validators=[DataRequired(message="Selecciona un género")])
 
-    height = FloatField('Altura (cm)', validators=[Optional(), NumberRange(min=50, max=250)])
-    weight = FloatField('Peso Inicial (kg)', validators=[Optional(), NumberRange(min=20, max=300)])
+    height = IntegerField('Altura (cm)', validators=[
+        DataRequired(message="La altura es obligatoria"),
+        NumberRange(min=50, max=300, message="Altura inválida (50-300 cm)")
+    ])
+
+    weight = FloatField('Peso Inicial (kg)', validators=[
+        DataRequired(message="El peso inicial es obligatorio"),
+        NumberRange(min=20, max=500, message="Peso inválido")
+    ])
 
     submit = SubmitField('Registrarse')
 

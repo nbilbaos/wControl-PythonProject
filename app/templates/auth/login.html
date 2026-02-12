@@ -1,99 +1,32 @@
 {% extends "base.html" %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
 {% block content %}
-<style>
-    /* El contenedor principal ocupa toda la altura (100vh) */
-    .auth-container {
-        min-height: 100vh;
-        width: 100%;
-        display: flex;
-        align-items: center; /* Centrado Vertical */
-        justify-content: center; /* Centrado Horizontal */
-        background-image: url('{{ background_url }}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        position: fixed; /* Fija el fondo */
-        top: 0;
-        left: 0;
-        z-index: 100; /* Asegura que tape el menú base si se colara algo */
-    }
-
-    /* Capa oscura sobre la imagen para que el texto resalte */
-    .auth-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5); /* 50% de oscuridad */
-        z-index: 1;
-    }
-
-    /* La tarjeta con efecto Glassmorphism */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.85); /* Blanco semitransparente */
-        backdrop-filter: blur(12px); /* Efecto borroso detrás */
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 20px;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        position: relative;
-        z-index: 2; /* Por encima del overlay */
-        overflow: hidden;
-    }
-
-    .form-control-lg {
-        border-radius: 10px;
-        font-size: 0.95rem;
-        padding: 12px 15px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid #e0e0e0;
-    }
-
-    .form-control-lg:focus {
-        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
-        border-color: #0d6efd;
-    }
-
-    .brand-logo {
-        width: 60px;
-        height: 60px;
-        background: #0d6efd;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin: 0 auto 20px;
-    }
-</style>
-
 <div class="auth-container">
     <div class="auth-overlay"></div>
 
     <div class="col-11 col-md-6 col-lg-4">
         <div class="glass-card p-4 p-md-5">
 
-            <div class="text-center mb-4">
-                <a href="{{ url_for('main.index') }}" class="text-decoration-none text-muted small fw-bold hover-link">
-                    <i class="bi bi-arrow-left me-1"></i> Volver al Inicio
+            <div class="text-center mb-4 position-relative">
+                <a href="{{ url_for('main.index') }}" class="position-absolute start-0 top-0 text-decoration-none text-muted small hover-link" title="Volver">
+                    <i class="bi bi-arrow-left fs-5"></i>
                 </a>
+                <div class="brand-logo">
+                    <i class="bi bi-activity"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-1">Bienvenido</h3>
+                <p class="text-muted small">Ingresa a tu cuenta personal</p>
             </div>
-
-            <div class="brand-logo shadow-sm">
-                <i class="bi bi-activity"></i>
-            </div>
-
-            <h3 class="fw-bold text-center text-dark mb-1">Bienvenido</h3>
-            <p class="text-muted text-center small mb-4">Ingresa tus credenciales para continuar.</p>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }} alert-dismissible fade show py-2 small shadow-sm" role="alert">
-                            {{ message }}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show py-2 small shadow-sm border-0" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     {% endfor %}
@@ -101,49 +34,61 @@
             {% endwith %}
 
             <form action="{{ url_for('auth.login') }}" method="POST">
-                {{ form.hidden_tag() }} <div class="mb-3">
-                    <label class="form-label small fw-bold text-muted">Correo Electrónico</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 rounded-start-3 text-muted">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Correo Electrónico</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text rounded-start-3">
                             <i class="bi bi-envelope"></i>
                         </span>
                         {% if form %}
-                            {{ form.email(class="form-control form-control-lg border-start-0 rounded-end-3", placeholder="ejemplo@correo.com") }}
+                            {{ form.email(class="form-control rounded-end-3", placeholder="nombre@correo.com", autocomplete="email") }}
                         {% else %}
-                            <input type="email" class="form-control form-control-lg border-start-0 rounded-end-3" name="email" placeholder="ejemplo@correo.com" required>
+                            <input type="email" class="form-control rounded-end-3" name="email" placeholder="nombre@correo.com" autocomplete="email" required>
                         {% endif %}
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label small fw-bold text-muted">Contraseña</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 rounded-start-3 text-muted">
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-secondary text-uppercase" style="font-size: 0.75rem; letter-spacing: 1px;">Contraseña</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text rounded-start-3">
                             <i class="bi bi-lock"></i>
                         </span>
+
                         {% if form %}
-                            {{ form.password(class="form-control form-control-lg border-start-0 rounded-end-3", placeholder="••••••••") }}
+                            {{ form.password(class="form-control", id="passwordInput", placeholder="••••••••", autocomplete="current-password") }}
                         {% else %}
-                            <input type="password" class="form-control form-control-lg border-start-0 rounded-end-3" name="password" placeholder="••••••••" required>
+                            <input type="password" class="form-control" name="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password" required>
                         {% endif %}
+
+                        <button class="btn btn-light border border-start-0 text-muted rounded-end-3" type="button" id="togglePassword">
+                            <i class="bi bi-eye"></i>
+                        </button>
                     </div>
-                    <div class="text-end mt-1">
-                        <a href="#" class="text-decoration-none small text-primary">¿Olvidaste tu contraseña?</a>
-                    </div>
+                </div>
+
+                <div class="text-end mb-4">
+                    <a href="#" class="text-decoration-none small text-primary fw-semibold">¿Olvidaste tu contraseña?</a>
                 </div>
 
                 <div class="d-grid mb-4">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg hover-scale">
                         Ingresar
                     </button>
                 </div>
             </form>
 
-            <div class="text-center border-top pt-3">
-                <span class="text-muted small">¿Aún no tienes cuenta?</span>
-                <a href="{{ url_for('auth.register') }}" class="fw-bold text-primary text-decoration-none ms-1">Regístrate</a>
+            <div class="text-center mt-4">
+                <span class="text-muted small">¿Nuevo en WeightControl?</span>
+                <a href="{{ url_for('auth.register') }}" class="fw-bold text-primary text-decoration-none ms-1">Crear cuenta</a>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}
