@@ -1,0 +1,36 @@
+/* app/static/css/history.css */
+
+/* Estilos de la cabecera de tabla */
+.table thead th {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6c757d;
+}
+
+/* =========================================
+   MODO IMPRESIÓN (PDF)
+   ========================================= */
+/* Esta clase se agrega vía JS antes de generar el PDF */
+
+.printing-mode {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Ocultar elementos marcados como no-print (Botones de acción) */
+.printing-mode .no-print {
+    display: none !important;
+}
+
+/* Ocultar la última columna de la tabla (donde estaban los botones) */
+.printing-mode th:last-child,
+.printing-mode td:last-child {
+    display: none !important;
+}
+
+/* Ajustes de tipografía para impresión */
+.printing-mode h3 {
+    color: #000 !important; /* Asegurar negro puro */
+}

@@ -1,20 +1,24 @@
 {% extends "base.html" %}
 
-{% block content %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+{% block title %}Historial Completo - WeightControl{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+{% endblock %}
+
+{% block content %}
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-secondary me-2"></i>Historial Completo</h2>
-            <p class="text-muted mb-0">Registro detallado de todas tus mediciones.</p>
+            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history text-secondary me-2"></i>Historial</h2>
+            <p class="text-muted mb-0">Registro detallado de tus mediciones.</p>
         </div>
         <div>
             <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary rounded-pill me-2">
                 <i class="bi bi-arrow-left"></i> Volver
             </a>
-            <button onclick="generateHistoryPDF()" class="btn btn-danger rounded-pill shadow-sm text-white">
-                <i class="bi bi-file-earmark-pdf-fill me-1"></i> Descargar PDF
+            <button id="btnDownloadPDF" class="btn btn-danger rounded-pill shadow-sm text-white">
+                <i class="bi bi-file-earmark-pdf-fill me-1"></i> PDF
             </button>
         </div>
     </div>
@@ -28,194 +32,144 @@
             </div>
             <div class="text-end">
                 <h5 class="fw-bold mb-0">{{ session.get('name', 'Usuario') }}</h5>
-                <p class="text-muted small mb-0">Generado el: <span id="report-date-header"></span></p>
+                <p class="text-muted small mb-0">Generado: <span id="report-date-header"></span></p>
             </div>
         </div>
 
-<div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
-            <tr>
-                <th class="ps-3 py-3">Fecha</th>
-                <th class="py-3">Peso</th>
-                <th class="py-3">IMC</th>
-                <th class="py-3 text-end pe-3">Variación</th>
-                <th class="text-end pe-3 py-3 no-print" style="width: 100px;">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in weight_history %}
-            <tr>
-                <td class="ps-3 fw-bold text-secondary">
-                    {{ entry.recorded_date.strftime('%d/%m/%Y') }}
-                </td>
-                <td>
-                    <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3">
-                        {{ entry.weight }} kg
-                    </span>
-                </td>
-                <td>
-                    {% if entry.imc %}
-                        <span class="fw-bold {{ 'text-success' if entry.imc < 25 else 'text-warning' }}">
-                            {{ entry.imc }}
-                        </span>
-                    {% else %}
-                        <span class="text-muted small">--</span>
-                    {% endif %}
-                </td>
-                <td class="text-end pe-3">
-                    {% if entry.variation is not none %}
-                        {% if entry.variation < 0 %}
-                            <span class="text-success fw-bold"><i class="bi bi-arrow-down-short"></i> {{ entry.variation|abs }}</span>
-                        {% elif entry.variation > 0 %}
-                            <span class="text-danger fw-bold"><i class="bi bi-arrow-up-short"></i> {{ entry.variation }}</span>
-                        {% else %}
-                            <span class="text-muted">=</span>
-                        {% endif %}
-                    {% else %}
-                        <span class="badge bg-secondary text-white small">Inicio</span>
-                    {% endif %}
-                </td>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3 py-3">Fecha</th>
+                        <th class="py-3">Peso</th>
+                        <th class="py-3">IMC</th>
+                        <th class="py-3 text-end pe-3">Variación</th>
+                        <th class="text-end pe-3 py-3 no-print" style="width: 100px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in weight_history %}
+                    <tr>
+                        <td class="ps-3 fw-bold text-secondary">
+                            {{ entry.recorded_date.strftime('%d/%m/%Y') }}
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fs-6 px-3">
+                                {{ entry.weight }} kg
+                            </span>
+                        </td>
+                        <td>
+                            {% if entry.imc %}
+                                <span class="fw-bold {{ 'text-success' if entry.imc < 25 else 'text-warning' }}">
+                                    {{ entry.imc }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small">--</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-3">
+                            {% if entry.variation is not none %}
+                                {% if entry.variation < 0 %}
+                                    <span class="text-success fw-bold"><i class="bi bi-arrow-down-short"></i> {{ entry.variation|abs }}</span>
+                                {% elif entry.variation > 0 %}
+                                    <span class="text-danger fw-bold"><i class="bi bi-arrow-up-short"></i> {{ entry.variation }}</span>
+                                {% else %}
+                                    <span class="text-muted">=</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-secondary text-white small">Inicio</span>
+                            {% endif %}
+                        </td>
 
-                <td class="text-end pe-3 no-print">
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal{{ entry._id }}">
-                            <i class="bi bi-pencil-square"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ entry._id }}">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-
-                    <div class="modal fade text-start" id="editModal{{ entry._id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Editar Registro</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form action="{{ url_for('main.edit_weight', entry_id=entry._id) }}" method="POST">
-                                    <div class="modal-body">
-
-                                        <input type="hidden" name="next" value="history">
-                                        <div class="mb-3">
-                                            <label class="form-label">Peso (kg)</label>
-                                            <input type="number" step="0.1" name="weight" class="form-control" value="{{ entry.weight }}" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Fecha</label>
-                                            <input type="date" name="date" class="form-control" value="{{ entry.recorded_date.strftime('%Y-%m-%d') }}" required>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                                    </div>
-                                </form>
+                        <td class="text-end pe-3 no-print">
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary border-0"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editModal"
+                                        data-url="{{ url_for('main.edit_weight', entry_id=entry._id) }}"
+                                        data-weight="{{ entry.weight }}"
+                                        data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger border-0"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-url="{{ url_for('main.delete_weight', entry_id=entry._id) }}"
+                                        data-weight="{{ entry.weight }}"
+                                        data-date="{{ entry.recorded_date.strftime('%d/%m/%Y') }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="modal fade text-start" id="deleteModal{{ entry._id }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header bg-danger text-white">
-                                    <h5 class="modal-title">¿Eliminar registro?</h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <p>Estás a punto de eliminar el registro de <strong>{{ entry.weight }} kg</strong> del día {{ entry.recorded_date.strftime('%d/%m/%Y') }}.</p>
-                                    <p class="text-danger small mb-0">Esta acción no se puede deshacer.</p>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-
-                                    <form action="{{ url_for('main.delete_weight', entry_id=entry._id) }}" method="POST">
-
-                                        <input type="hidden" name="next" value="history">
-
-                                        <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
-                                    </form>
-                                    </div>
-                            </div>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         <div class="mt-5 pt-3 border-top text-center">
             <p class="text-muted fst-italic small">
-                "Lo que no se mide, no se puede mejorar." - Este documento es un reporte generado automáticamente por la plataforma Weight Control.
+                "Lo que no se mide, no se puede mejorar." - Reporte generado por WeightControl.
             </p>
         </div>
-
     </div>
 </div>
 
-<script>
-    // Poner la fecha de hoy automáticamente al cargar
-    document.addEventListener('DOMContentLoaded', function() {
-        const today = new Date().toLocaleDateString('es-CL', {
-            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-        });
-        document.getElementById('report-date-header').innerText = today;
-    });
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Registro</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editForm" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="next" value="history">
+                    <div class="mb-3">
+                        <label class="form-label">Peso (kg)</label>
+                        <input type="number" step="0.1" name="weight" id="editWeightInput" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" name="date" id="editDateInput" class="form-control" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-    function generateHistoryPDF() {
-        const element = document.getElementById('history-report');
-        const userName = "{{ session.get('name', 'Usuario') }}".replace(/\s+/g, '_');
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">¿Eliminar registro?</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Estás a punto de eliminar el registro del día <strong id="deleteDateText"></strong> con peso <strong id="deleteWeightText"></strong>.</p>
+                <p class="text-danger small mb-0">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="POST">
+                    <input type="hidden" name="next" value="history">
+                    <button type="submit" class="btn btn-danger">Sí, Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-        const opt = {
-            margin:       [15, 15, 15, 15],
-            filename:     `Historial_WeightControl_${userName}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+<div id="userData" data-username="{{ session.get('name', 'Usuario') }}" style="display:none;"></div>
 
-        // 1. ACTIVAMOS EL MODO "LIMPIO" (Oculta los botones)
-        element.classList.add('printing-mode');
+{% endblock %}
 
-        // 2. GENERAMOS EL PDF
-        html2pdf().set(opt).from(element).save().then(() => {
-            // 3. DESACTIVAMOS EL MODO "LIMPIO" (Vuelven los botones)
-            element.classList.remove('printing-mode');
-        });
-    }
-</script>
-
-<style>
-    /* Estilos visuales de la tabla */
-    .table thead th {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #6c757d;
-    }
-
-    /* MODO IMPRESIÓN (PDF) */
-    /* Cuando JS agrega esta clase al contenedor, ocurren estos cambios: */
-
-    .printing-mode {
-        box-shadow: none !important;
-        border: none !important;
-    }
-
-    /* ¡AQUÍ ESTÁ EL TRUCO! */
-    /* Ocultar cualquier elemento con la clase 'no-print' dentro del modo impresión */
-    .printing-mode .no-print {
-        display: none !important;
-    }
-
-    /* Opcional: Ajustar anchos de columna para que se vea bien sin los botones */
-    .printing-mode th:last-child,
-    .printing-mode td:last-child {
-        display: none !important;
-    }
-</style>
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
 {% endblock %}
