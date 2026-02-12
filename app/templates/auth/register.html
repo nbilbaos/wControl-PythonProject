@@ -4,11 +4,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <style>
 
+        /* Sobreescribimos la posición fija para permitir deslizar hacia abajo */
+        .auth-container {
+            position: relative !important; /* CRUCIAL: Permite que la página crezca */
+            height: auto !important;       /* La altura se adapta al contenido */
+            min-height: 100vh;             /* Al menos del tamaño de la pantalla */
+            padding-top: 40px;             /* Espacio para no pegar la tarjeta al techo */
+            padding-bottom: 40px;          /* Espacio final para poder scrollear hasta abajo */
+            overflow-y: visible !important;
+
+            /* Fondo limpio (sin imagen) */
+            background-image: none !important;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
         /* Ajuste específico para el registro (tarjeta más ancha) */
         .glass-card {
             max-width: 600px;
             margin: 0 auto;
         }
+
+        /* Color verde para el branding de registro */
+        .brand-logo-register {
+            background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+            box-shadow: 0 10px 20px rgba(25, 135, 84, 0.3);
+        }
+
         .section-title {
             font-size: 0.75rem;
             letter-spacing: 1px;
@@ -94,7 +115,7 @@
                 </div>
 
                 <div class="mb-4">
-                    <h6 class="section-title text-primary border-success border-opacity-25">Perfil Físico Inicial</h6>
+                    <h6 class="section-title text-success border-success border-opacity-25">Perfil Físico Inicial</h6>
                     <div class="bg-light p-3 rounded-3 border border-light-subtle">
                         <div class="row g-3">
                             <div class="col-md-4">
@@ -126,7 +147,7 @@
                 </div>
 
                 <div class="d-grid mb-4">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-lg hover-scale">
+                    <button type="submit" class="btn btn-success btn-lg rounded-pill fw-bold shadow-lg hover-scale">
                         Completar Registro
                     </button>
                 </div>
@@ -134,7 +155,7 @@
 
             <div class="text-center pt-2 border-top">
                 <span class="text-muted small">¿Ya tienes cuenta?</span>
-                <a href="{{ url_for('auth.login') }}" class="fw-bold text-primary text-decoration-none ms-1">Iniciar Sesión</a>
+                <a href="{{ url_for('auth.login') }}" class="fw-bold text-success text-decoration-none ms-1">Iniciar Sesión</a>
             </div>
         </div>
     </div>

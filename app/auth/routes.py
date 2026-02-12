@@ -12,15 +12,6 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     form = RegistrationForm()
 
-    # --- NUEVO: Lógica de Imagen de Fondo ---
-    bg_data = current_app.db.site_content.find_one({'type': 'auth_background'})
-    if bg_data:
-        bg_url = url_for('static', filename='uploads/backgrounds/' + bg_data['url'])
-    else:
-        # Misma imagen de deporte por defecto
-        bg_url = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1920&q=80'
-    # ----------------------------------------
-
     if form.validate_on_submit():
         # 1. Obtener datos limpios del formulario
         email = form.email.data
@@ -73,21 +64,13 @@ def register():
         return redirect(url_for('auth.login'))
 
     # Si hay errores o es GET, renderizamos el template pasando el formulario
-    return render_template('auth/register.html', form=form, background_url=bg_url)
+    return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     # 1. Instanciamos el formulario (Esto soluciona el error 'form undefined')
     form = LoginForm()
 
-    # 2. Lógica de Imagen de Fondo (Tu código original mejorado)
-    bg_data = current_app.db.site_content.find_one({'type': 'auth_background'})
-
-    if bg_data:
-        bg_url = url_for('static', filename='uploads/backgrounds/' + bg_data['url'])
-    else:
-        # Imagen por defecto (Gym/Deporte)
-        bg_url = 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1920&q=80'
 
     # 3. Validación del Formulario
     if form.validate_on_submit():
@@ -117,7 +100,7 @@ def login():
         flash('Correo o contraseña incorrectos.', 'danger')
 
     # 5. Renderizado (Ahora 'form' y 'background_url' existen y son correctos)
-    return render_template('auth/login.html', form=form, background_url=bg_url)
+    return render_template('auth/login.html', form=form)
 
 
 @auth_bp.route('/logout')

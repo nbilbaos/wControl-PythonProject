@@ -57,7 +57,7 @@
     border-color: #dee2e6;
 }
 
-/* Efecto focus en todo el grupo */
+/* Efecto focus en*/
 .input-group:focus-within .input-group-text,
 .input-group:focus-within .form-control {
     border-color: #0d6efd;
