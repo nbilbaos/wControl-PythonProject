@@ -1,11 +1,11 @@
 import pymongo
-from flask import Blueprint, render_template, session, current_app, request, url_for, flash ,redirect
+from flask import render_template, session, current_app, request, url_for, flash ,redirect
 from app.decorators import login_required
 from bson.objectid import ObjectId
 from datetime import datetime, timezone
 from app.auth.forms import ProfileForm
 from werkzeug.security import check_password_hash, generate_password_hash
-main_bp = Blueprint('main', __name__)
+from app.main import main_bp
 
 
 @main_bp.route('/dashboard')

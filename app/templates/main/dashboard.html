@@ -2,7 +2,14 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+<div id="dashboardData"
+     data-new-achievement="{{ new_achievement_unlocked or '' }}"
+     data-progress="{{ progress_pct | default(0) }}"
+     data-chart-api-url="{{ url_for('main.get_chart_data') }}"
+     style="display: none;">
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
         <h2 class="fw-bold mb-0">Hola, {{ user.name }}</h2>
         <p class="text-muted small mb-0">Resumen de tu progreso</p>
@@ -12,9 +19,9 @@
     </button>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-3">
     <div class="col-md-4">
-        <div class="card h-100 p-3 bg-white">
+        <div class="card shadow h-100 p-3 bg-white">
             <div class="d-flex align-items-center mb-2">
                 <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
                     <i class="bi bi-speedometer2 fs-4"></i>
@@ -34,7 +41,7 @@
     {% endif %}
 
     <div class="col-md-4">
-        <div class="card h-100 p-3 {{ bmi_color }}">
+        <div class="card shadow h-100 p-3 {{ bmi_color }}">
             <div class="d-flex align-items-center mb-2">
                 <div class="bg-white bg-opacity-50 p-2 rounded-3 me-3">
                     <i class="bi bi-heart-pulse fs-4"></i>
@@ -46,7 +53,7 @@
     </div>
 
     <div class="col-md-4">
-        <div class="card h-100 p-3 bg-white">
+        <div class="card shadow h-100 p-3 bg-white">
             <div class="d-flex align-items-center mb-2">
                 <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3">
                     <i class="bi bi-graph-up-arrow fs-4"></i>
@@ -61,7 +68,7 @@
 </div>
 
 {% if weight_goal %}
-<div class="card shadow-sm border-0 mb-4 bg-white">
+<div class="card shadow border-0 mb-3 bg-white">
     <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
@@ -97,7 +104,7 @@
     </div>
 </div>
 {% else %}
-<div class="alert alert-light border shadow-sm mb-4 d-flex align-items-center">
+<div class="alert alert-light border shadow-sm mb-3 d-flex align-items-center">
     <i class="bi bi-info-circle-fill text-primary fs-4 me-3"></i>
     <div>
         <strong>¿Tienes un objetivo en mente?</strong>
@@ -106,209 +113,117 @@
 </div>
 {% endif %}
 
-<div class="card mb-4 p-4">
-    <h5 class="fw-bold mb-3">Tendencia de Peso</h5>
-    <div style="height: 300px;">
-        <canvas id="weightChart"></canvas>
+<div class="card shadow mb-3">
+    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h6 class="m-0 fw-bold">Evolución de Peso</h6>
+        <div class="dropdown no-arrow">
+            <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#chartSettingsModal" class="text-secondary">
+                <i class="bi bi-gear-fill fs-5"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="chart-area" style="position: relative; height: 400px; width: 100%;">
+            <canvas id="weightChart"></canvas>
+        </div>
     </div>
 </div>
 
-<div class="card shadow-sm mt-4 mb-5">
-    <div class="card-body">
-        <h5 class="card-title fw-bold">¿Qué es el IMC?</h5>
-        <p class="text-muted">
-            El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable para su estatura.
-        </p>
+<div class="modal fade" id="chartSettingsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
 
-        <h6 class="mt-4 mb-3 fw-bold">Clasificación según la OMS:</h6>
+        <h5 class="modal-title">Configurar Gráfico</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="chartOptionsForm">
+            <div class="mb-3">
+                <label class="form-label">Rango de Tiempo</label>
+                <select class="form-select" id="timeFilter" onchange="toggleCustomDate()">
+                    <option value="1m">Último Mes</option>
+                    <option value="3m">Últimos 3 Meses</option>
+                    <option value="all">Todo el historial (con Tendencia)</option>
+                    <option value="custom">Rango Personalizado</option>
+                </select>
+            </div>
 
-        <div class="table-responsive" style="overflow-x: auto;">
-            <div class="row g-0 text-center text-white small fw-bold mt-3 flex-nowrap" style="min-height: 90px; min-width: 600px;">
-
-                <div class="col d-flex flex-column justify-content-center position-relative
-                            {% if current_bmi and current_bmi < 18.5 %} border border-3 border-dark shadow scale-up {% endif %}"
-                     style="background-color: #d6eaff; color: #000 !important; transition: all 0.3s;">
-                    <span>&lt; 18.5</span>
-                    <span>Bajo Peso</span>
-                    {% if current_bmi and current_bmi < 18.5 %}
-                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                    {% endif %}
+            <div id="customDateRange" style="display:none;">
+                <div class="mb-3">
+                    <label class="form-label">Desde:</label>
+                    <input type="date" class="form-control" id="startDate">
                 </div>
-
-                <div class="col d-flex flex-column justify-content-center position-relative
-                            {% if current_bmi and 18.5 <= current_bmi < 25 %} border border-3 border-dark shadow scale-up {% endif %}"
-                     style="background-color: #aadd77; color: #004d00 !important; transition: all 0.3s;">
-                    <span>18.5 - 24.9</span>
-                    <span>Normal</span>
-                    {% if current_bmi and 18.5 <= current_bmi < 25 %}
-                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                    {% endif %}
-                </div>
-
-                <div class="col d-flex flex-column justify-content-center position-relative
-                            {% if current_bmi and 25 <= current_bmi < 30 %} border border-3 border-dark shadow scale-up {% endif %}"
-                     style="background-color: #ffdd55; color: #554400 !important; transition: all 0.3s;">
-                    <span>25.0 - 29.9</span>
-                    <span>Sobrepeso</span>
-                    {% if current_bmi and 25 <= current_bmi < 30 %}
-                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                    {% endif %}
-                </div>
-
-                <div class="col d-flex flex-column justify-content-center position-relative
-                            {% if current_bmi and 30 <= current_bmi < 35 %} border border-3 border-dark shadow scale-up {% endif %}"
-                     style="background-color: #ffaa00; transition: all 0.3s;">
-                    <span>30.0 - 34.9</span>
-                    <span>Obesidad I</span>
-                    {% if current_bmi and 30 <= current_bmi < 35 %}
-                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                    {% endif %}
-                </div>
-
-                <div class="col d-flex flex-column justify-content-center position-relative
-                            {% if current_bmi and 35 <= current_bmi < 40 %} border border-3 border-dark shadow scale-up {% endif %}"
-                     style="background-color: #ff6600; transition: all 0.3s;">
-                    <span>35.0 - 39.9</span>
-                    <span>Obesidad II</span>
-                    {% if current_bmi and 35 <= current_bmi < 40 %}
-                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                    {% endif %}
-                </div>
-
-                <div class="col d-flex flex-column justify-content-center position-relative
-                            {% if current_bmi and current_bmi >= 40 %} border border-3 border-dark shadow scale-up {% endif %}"
-                     style="background-color: #dc3545; transition: all 0.3s;">
-                    <span>&ge; 40</span>
-                    <span>Obesidad III</span>
-                    {% if current_bmi and current_bmi >= 40 %}
-                        <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                    {% endif %}
+                <div class="mb-3">
+                    <label class="form-label">Hasta:</label>
+                    <input type="date" class="form-control" id="endDate">
                 </div>
             </div>
-        </div>
-
-        <div class="mt-2 text-muted small fst-italic">
-            <i class="bi bi-info-circle"></i> Nota: Desliza hacia los lados si no ves la tabla completa.
-        </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" onclick="updateChart()">Aplicar</button>
+      </div>
     </div>
-    <style>
-        .scale-up {
-            transform: scale(1.05);
-            z-index: 10;
-        }
-    </style>
+  </div>
 </div>
 
-<div class="card shadow-sm border-0 mb-4 bg-white">
+<div class="card shadow mt-4 mb-3">
+    <div class="card-body">
+        <h5 class="card-title fw-bold">¿Qué es el IMC?</h5>
+        <p class="text-muted">El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable.</p>
+        <h6 class="mt-1 mb-1 fw-bold">Clasificación según la OMS:</h6>
+        <div class="table-responsive">
+            <div class="row g-0 text-center text-white small fw-bold mt-3 flex-nowrap" style="min-height: 90px; min-width: 600px;">
+                {% set ranges = [
+                    {'max': 18.5, 'label': '< 18.5', 'text': 'Bajo Peso', 'bg': '#d6eaff', 'txt': '#000'},
+                    {'min': 18.5, 'max': 25, 'label': '18.5 - 24.9', 'text': 'Normal', 'bg': '#aadd77', 'txt': '#004d00'},
+                    {'min': 25, 'max': 30, 'label': '25.0 - 29.9', 'text': 'Sobrepeso', 'bg': '#ffdd55', 'txt': '#554400'},
+                    {'min': 30, 'max': 35, 'label': '30.0 - 34.9', 'text': 'Obesidad I', 'bg': '#ffaa00', 'txt': '#fff'},
+                    {'min': 35, 'max': 40, 'label': '35.0 - 39.9', 'text': 'Obesidad II', 'bg': '#ff6600', 'txt': '#fff'},
+                    {'min': 40, 'label': '≥ 40', 'text': 'Obesidad III', 'bg': '#dc3545', 'txt': '#fff'}
+                ] %}
+
+                {% for r in ranges %}
+                    <div class="col d-flex flex-column justify-content-center position-relative"
+                         style="background-color: {{ r.bg }}; color: {{ r.txt }} !important;">
+                        <span>{{ r.label }}</span>
+                        <span>{{ r.text }}</span>
+                        {% if current_bmi %}
+                             {% if (r.min is not defined or current_bmi >= r.min) and (r.max is not defined or current_bmi < r.max) %}
+                                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
+                             {% endif %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow border-0 mb-3 bg-white">
     <div class="card-header bg-white border-0 py-3">
-        <h5 class="fw-bold mb-0 text-dark">
-            <i class="bi bi-trophy text-warning me-2"></i> Logros del Camino
-        </h5>
+        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-trophy text-warning me-2"></i> Logros del Camino</h5>
     </div>
     <div class="card-body p-4">
         <div class="row text-center g-2">
+            {% for key, meta in [('bronce', '25%'), ('plata', '50%'), ('oro', '75%'), ('campeon', '100%')] %}
             <div class="col-3">
-                <div class="achievement-wrapper {% if logros.bronce %}active{% endif %}" id="medal-bronce">
+                <div class="achievement-wrapper {% if logros[key] %}active{% endif %}" id="medal-{{ key }}">
                     <div class="icon-circle shadow-sm">
-                        <i class="bi bi-medal-fill"></i>
+                        <i class="bi {% if key == 'campeon' %}bi-trophy-fill{% else %}bi-medal-fill{% endif %}"></i>
                     </div>
-                    <p class="small fw-bold mt-2 mb-0">25%</p>
-                    <span class="text-muted extra-small">Bronce</span>
+                    <p class="small fw-bold mt-2 mb-0">{{ meta }}</p>
+                    <span class="text-muted extra-small">{{ key|capitalize }}</span>
                 </div>
             </div>
-            <div class="col-3">
-                <div class="achievement-wrapper {% if logros.plata %}active{% endif %}" id="medal-plata">
-                    <div class="icon-circle shadow-sm">
-                        <i class="bi bi-medal-fill"></i>
-                    </div>
-                    <p class="small fw-bold mt-2 mb-0">50%</p>
-                    <span class="text-muted extra-small">Plata</span>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="achievement-wrapper {% if logros.oro %}active{% endif %}" id="medal-oro">
-                    <div class="icon-circle shadow-sm">
-                        <i class="bi bi-medal-fill"></i>
-                    </div>
-                    <p class="small fw-bold mt-2 mb-0">75%</p>
-                    <span class="text-muted extra-small">Oro</span>
-                </div>
-            </div>
-            <div class="col-3">
-                <div class="achievement-wrapper {% if logros.campeon %}active{% endif %}" id="medal-campeon">
-                    <div class="icon-circle shadow-sm">
-                        <i class="bi bi-trophy-fill"></i>
-                    </div>
-                    <p class="small fw-bold mt-2 mb-0">100%</p>
-                    <span class="text-muted extra-small">¡Meta!</span>
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
 
-<style>
-    /* 1. Estilo Base (Estado Bloqueado / Default) */
-    .achievement-wrapper .icon-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        font-size: 1.8rem;
-        transition: all 0.3s ease;
-        background-color: #e9ecef;
-        color: #adb5bd;
-    }
-
-    /* Ajuste para móviles muy pequeños */
-    @media (max-width: 400px) {
-        .achievement-wrapper .icon-circle {
-            width: 45px;
-            height: 45px;
-            font-size: 1.2rem;
-        }
-    }
-
-    .achievement-wrapper {
-        opacity: 0.6;
-        transform: scale(0.95);
-        transition: all 0.3s ease;
-    }
-
-    .achievement-wrapper.active {
-        opacity: 1;
-        transform: scale(1.05);
-    }
-
-    /* Colores Específicos */
-    .achievement-wrapper.active#medal-bronce .icon-circle {
-        background-color: #fff5eb;
-        color: #cd7f32;
-        box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important;
-    }
-    .achievement-wrapper.active#medal-plata .icon-circle {
-        background-color: #f8f9fa;
-        color: #7a7a7a;
-        box-shadow: 0 0 10px rgba(122, 122, 122, 0.3) !important;
-    }
-    .achievement-wrapper.active#medal-oro .icon-circle {
-        background-color: #fffdf0;
-        color: #ffc107;
-        box-shadow: 0 0 10px rgba(255, 193, 7, 0.4) !important;
-    }
-    .achievement-wrapper.active#medal-campeon .icon-circle {
-        background-color: #e7f1ff;
-        color: #0d6efd;
-        box-shadow: 0 0 15px rgba(13, 110, 253, 0.4) !important;
-    }
-
-    .extra-small { font-size: 0.7rem; }
-</style>
-
-<div class="card mb-4 overflow-hidden">
+<div class="card shadow mb-3 overflow-hidden">
     <div class="card-header bg-white py-3">
         <h5 class="fw-bold mb-0">Historial Reciente</h5>
     </div>
@@ -330,32 +245,24 @@
                     <td class="fw-bold">{{ entry.weight }} kg</td>
                     <td>
                         {% if entry.variation is not none %}
-                            {% if entry.variation < 0 %}
-                                <span class="badge bg-success bg-opacity-10 text-success"><i class="bi bi-arrow-down"></i> {{ entry.variation|abs }}</span>
-                            {% elif entry.variation > 0 %}
-                                <span class="badge bg-danger bg-opacity-10 text-danger"><i class="bi bi-arrow-up"></i> {{ entry.variation }}</span>
-                            {% else %}
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary">-</span>
-                            {% endif %}
-                        {% else %}
-                            <small class="text-muted">Inicio</small>
-                        {% endif %}
+                            <span class="badge bg-opacity-10
+                                {% if entry.variation < 0 %}bg-success text-success{% elif entry.variation > 0 %}bg-danger text-danger{% else %}bg-secondary text-secondary{% endif %}">
+                                {{ entry.variation|abs if entry.variation < 0 else entry.variation }}
+                                <i class="bi {% if entry.variation < 0 %}bi-arrow-down{% elif entry.variation > 0 %}bi-arrow-up{% else %}{% endif %}"></i>
+                            </span>
+                        {% else %}<small class="text-muted">Inicio</small>{% endif %}
                     </td>
-                    <td>
-                        <span class="fw-bold small">{{ entry.imc if entry.imc else '--' }}</span>
-                    </td>
+                    <td>{{ entry.imc if entry.imc else '--' }}</td>
                     <td class="text-end pe-4">
                         <button class="btn btn-sm btn-light text-primary me-1"
                                 data-bs-toggle="modal" data-bs-target="#editWeightModal"
-                                data-id="{{ entry._id }}" data-weight="{{ entry.weight }}" data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}"
-                                title="Editar">
-                            <i class="bi bi-pencil-square fs-6"></i>
+                                data-id="{{ entry._id }}" data-weight="{{ entry.weight }}" data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
+                            <i class="bi bi-pencil-square"></i>
                         </button>
                         <button class="btn btn-sm btn-light text-danger"
                                 data-bs-toggle="modal" data-bs-target="#deleteWeightModal"
-                                data-id="{{ entry._id }}"
-                                title="Eliminar">
-                            <i class="bi bi-trash fs-6"></i>
+                                data-id="{{ entry._id }}">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -363,20 +270,11 @@
             </tbody>
         </table>
     </div>
-
-    {% if total_entries > 10 %}
-    <div class="text-center mt-3 border-top pt-3 pb-3">
-        <p class="text-muted small mb-2">Mostrando los últimos 10 registros de un total de {{ total_entries }}.</p>
-            <a href="{{ url_for('main.full_history') }}" class="btn btn-outline-primary rounded-pill px-4">
-                <i class="bi bi-journal-text"></i> Ver Historial Completo
-            </a>
-    </div>
-    {% endif %}
 </div>
 
 <div class="modal fade" id="editWeightModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" >
+    <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">Editar Registro</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -409,212 +307,84 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p>¿Estás seguro de que deseas eliminar este registro de peso?</p>
-        <p class="text-muted small">Esta acción no se puede deshacer.</p>
+        <p>¿Estás seguro de que deseas eliminar este registro?</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <form id="deleteForm" method="POST">
-            <button type="submit" class="btn btn-danger">Eliminar Definitivamente</button>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
         </form>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="weightModal" tabindex="-1" aria-labelledby="weightModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered"> <div class="modal-content">
+<div class="modal fade" id="weightModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="weightModalLabel">Nuevo Registro</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Nuevo Registro</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-
       <form action="{{ url_for('main.add_weight_entry') }}" method="POST">
           <div class="modal-body">
             <div class="mb-3">
-                <label for="weightInput" class="form-label">Peso (kg)</label>
-                <input type="number" step="0.1" class="form-control form-control-lg" name="weight" id="weightInput" placeholder="Ej: 75.5" required>
+                <label class="form-label">Peso (kg)</label>
+                <input type="number" step="0.1" class="form-control" name="weight" id="weightInput" placeholder="Ej: 75.5" required>
             </div>
             <div class="mb-3">
-                <label for="dateInput" class="form-label">Fecha del registro</label>
+                <label class="form-label">Fecha</label>
                 <input type="date" class="form-control" name="date" id="dateInput" required>
-                <div class="form-text">Puedes cambiar la fecha si es un registro pasado.</div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Guardar Registro</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
           </div>
       </form>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
 <div class="modal fade" id="achievementModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg text-center" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
             <div class="modal-header border-0 justify-content-end pb-0">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body pb-5 pt-0">
                 <div class="mb-4 achievement-bounce">
                     <i id="modalIcon" class="bi display-1"></i>
                 </div>
                 <h2 class="fw-bold text-dark mb-3">¡Nuevo Logro Desbloqueado!</h2>
-                <h4 id="modalTitle" class="fw-bold mb-3 text-uppercase" style="letter-spacing: 2px;"></h4>
-                <p class="text-muted px-4">
-                    Has demostrado una constancia increíble. ¡Sigue así, estás cada vez más cerca de tu meta!
-                </p>
-                <button type="button" class="btn btn-primary rounded-pill px-5 mt-3 shadow-sm" data-bs-dismiss="modal">
-                    ¡Genial, sigamos!
-                </button>
+                <h4 id="modalTitle" class="fw-bold mb-3 text-uppercase"></h4>
+                <p class="text-muted px-4">Has demostrado una constancia increíble.</p>
+                <button type="button" class="btn btn-primary rounded-pill px-5 mt-3 shadow-sm" data-bs-dismiss="modal">¡Genial!</button>
             </div>
         </div>
     </div>
 </div>
 
-{% if new_achievement_unlocked %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const badgeData = {
-            'bronce': { title: 'Medalla de Bronce', color: '#cd7f32', icon: 'bi-medal-fill' },
-            'plata':  { title: 'Medalla de Plata',  color: '#7a7a7a', icon: 'bi-medal-fill' },
-            'oro':    { title: 'Medalla de Oro',    color: '#ffc107', icon: 'bi-medal-fill' },
-            'campeon':{ title: 'Trofeo de Campeón', color: '#0d6efd', icon: 'bi-trophy-fill' }
-        };
-        // CORRECCIÓN DE SEGURIDAD: default vacío si es None
-        const unlocked = "{{ new_achievement_unlocked or '' }}";
-        const data = badgeData[unlocked];
-
-        if (data) {
-            const modalTitle = document.getElementById('modalTitle');
-            const modalIcon = document.getElementById('modalIcon');
-            modalTitle.innerText = data.title;
-            modalTitle.style.color = data.color;
-            modalIcon.classList.add(data.icon);
-            modalIcon.style.color = data.color;
-            modalIcon.style.filter = `drop-shadow(0 0 15px ${data.color})`;
-
-            const myModal = new bootstrap.Modal(document.getElementById('achievementModal'));
-            myModal.show();
-
-            var duration = 3 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) { return clearInterval(interval); }
-                var particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
-        }
-    });
-</script>
-{% endif %}
-
 <style>
-    .achievement-bounce {
-        animation: bounce 2s infinite;
+    .achievement-wrapper .icon-circle {
+        width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 1.8rem; transition: all 0.3s ease; background-color: #e9ecef; color: #adb5bd;
     }
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-        40% {transform: translateY(-20px);}
-        60% {transform: translateY(-10px);}
-    }
+    .achievement-wrapper { opacity: 0.6; transform: scale(0.95); transition: all 0.3s ease; }
+    .achievement-wrapper.active { opacity: 1; transform: scale(1.05); }
+    .achievement-wrapper.active#medal-bronce .icon-circle { background-color: #fff5eb; color: #cd7f32; box-shadow: 0 0 10px rgba(205, 127, 50, 0.3); }
+    .achievement-wrapper.active#medal-plata .icon-circle { background-color: #f8f9fa; color: #7a7a7a; box-shadow: 0 0 10px rgba(122, 122, 122, 0.3); }
+    .achievement-wrapper.active#medal-oro .icon-circle { background-color: #fffdf0; color: #ffc107; box-shadow: 0 0 10px rgba(255, 193, 7, 0.4); }
+    .achievement-wrapper.active#medal-campeon .icon-circle { background-color: #e7f1ff; color: #0d6efd; box-shadow: 0 0 15px rgba(13, 110, 253, 0.4); }
+    .extra-small { font-size: 0.7rem; }
+    .achievement-bounce { animation: bounce 2s infinite; }
+    @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-20px);} 60% {transform: translateY(-10px);} }
 </style>
 
-<script>
-    const ctx = document.getElementById('weightChart').getContext('2d');
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    // 3. MEJORA DE SEGURIDAD: | tojson en lugar de | safe para listas
-    const labels = {{ dates_labels | tojson }};
-    const dataPoints = {{ weights_data | tojson }};
+<script src="{{ url_for('static', filename='js/dashboard_interactions.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard_chart.js') }}"></script>
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Peso (kg)',
-                data: dataPoints,
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                borderWidth: 3,
-                pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#0d6efd',
-                pointRadius: 5,
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                y: {
-                    grid: { borderDash: [5, 5] },
-                    beginAtZero: false
-                },
-                x: {
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-</script>
-
-<script>
-    // Lógica para el Modal de EDITAR
-    var editModal = document.getElementById('editWeightModal')
-    editModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget
-        var id = button.getAttribute('data-id')
-        var weight = button.getAttribute('data-weight')
-        var date = button.getAttribute('data-date')
-
-        var modalBodyInputWeight = editModal.querySelector('#editWeightInput')
-        var modalBodyInputDate = editModal.querySelector('#editDateInput')
-        var editForm = editModal.querySelector('#editForm')
-
-        modalBodyInputWeight.value = weight
-        modalBodyInputDate.value = date
-        editForm.action = "/edit_weight/" + id
-    })
-
-    // Lógica para el Modal de ELIMINAR
-    var deleteModal = document.getElementById('deleteWeightModal')
-    deleteModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget
-        var id = button.getAttribute('data-id')
-        var deleteForm = deleteModal.querySelector('#deleteForm')
-        deleteForm.action = "/delete_weight/" + id
-    })
-
-    // Poner fecha de hoy
-    document.addEventListener('DOMContentLoaded', (event) => {
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById('dateInput');
-        if(dateInput) dateInput.value = today;
-    });
-
-    // Animación de logros existentes
-    document.addEventListener('DOMContentLoaded', function() {
-        const progress = {{ progress_pct | default(0) }};
-        const activeAchievements = document.querySelectorAll('.achievement-wrapper.active');
-        activeAchievements.forEach((el, index) => {
-            el.style.opacity = "0";
-            setTimeout(() => {
-                el.style.opacity = "1";
-            }, 200 * index);
-        });
-    });
-</script>
 {% endblock %}
