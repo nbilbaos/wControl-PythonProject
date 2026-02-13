@@ -116,7 +116,7 @@
     position: fixed;
     bottom: 30px;
     right: 30px;
-    z-index: 1000; /* Asegura que flote sobre todo */
+    z-index: 1000; /* Asegura que flote sobre*/
 }
 
 .btn-fab {

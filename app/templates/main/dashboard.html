@@ -97,7 +97,18 @@
         <div class="pbi-card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="pbi-header mb-0">Estado de Salud (IMC)</h6>
-                <span class="badge bg-light text-secondary rounded-pill fw-normal border">OMS</span>
+
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-secondary rounded-pill fw-normal border me-2">OMS</span>
+
+                    <button type="button" class="btn btn-sm btn-light text-primary rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            style="width: 24px; height: 24px;"
+                            data-bs-toggle="modal"
+                            data-bs-target="#bmiInfoModal"
+                            title="¿Qué es esto?">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </button>
+                </div>
             </div>
 
             {% if current_bmi %}

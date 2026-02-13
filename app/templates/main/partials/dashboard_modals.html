@@ -136,3 +136,82 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="bmiInfoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold"><i class="bi bi-info-circle me-2"></i>Sobre el IMC</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+
+        <h6 class="fw-bold text-dark">¿Qué es el IMC?</h6>
+        <p class="text-muted small text-justify mb-4">
+            El Índice de Masa Corporal (IMC) es una medida estándar utilizada internacionalmente para evaluar si una persona tiene un peso saludable en relación con su altura. Se calcula dividiendo el peso en kilogramos por el cuadrado de la altura en metros.
+        </p>
+
+        {% if current_bmi %}
+        <div class="alert alert-primary d-flex align-items-center mb-4 border-0 shadow-sm rounded-3">
+            <i class="bi bi-person-check-fill fs-3 me-3"></i>
+            <div>
+                <small class="text-uppercase fw-bold opacity-75" style="font-size: 0.7rem;">Tu Estado Actual</small>
+                <div class="fw-bold fs-5">IMC {{ current_bmi }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <h6 class="fw-bold text-dark mb-3">Clasificación OMS</h6>
+        <div class="table-responsive">
+            <table class="table table-sm table-borderless small align-middle mb-0">
+                <thead class="bg-light text-secondary">
+                    <tr>
+                        <th class="ps-3 py-2 rounded-start">Categoría</th>
+                        <th class="pe-3 py-2 rounded-end text-end">Rango IMC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="{% if current_bmi and current_bmi < 18.5 %}bg-info bg-opacity-10 fw-bold text-info border-start border-4 border-info{% endif %}">
+                        <td class="ps-3 py-2">Bajo Peso</td>
+                        <td class="pe-3 py-2 text-end">&lt; 18.5</td>
+                    </tr>
+
+                    <tr class="{% if current_bmi and current_bmi >= 18.5 and current_bmi < 25 %}bg-success bg-opacity-10 fw-bold text-success border-start border-4 border-success{% endif %}">
+                        <td class="ps-3 py-2">Peso Normal</td>
+                        <td class="pe-3 py-2 text-end">18.5 - 24.9</td>
+                    </tr>
+
+                    <tr class="{% if current_bmi and current_bmi >= 25 and current_bmi < 30 %}bg-warning bg-opacity-10 fw-bold text-warning border-start border-4 border-warning{% endif %}">
+                        <td class="ps-3 py-2">Sobrepeso</td>
+                        <td class="pe-3 py-2 text-end">25.0 - 29.9</td>
+                    </tr>
+
+                    <tr class="{% if current_bmi and current_bmi >= 30 and current_bmi < 35 %}bg-danger bg-opacity-10 fw-bold text-danger border-start border-4 border-danger{% endif %}">
+                        <td class="ps-3 py-2">Obesidad Grado I</td>
+                        <td class="pe-3 py-2 text-end">30.0 - 34.9</td>
+                    </tr>
+
+                    <tr class="{% if current_bmi and current_bmi >= 35 and current_bmi < 40 %}bg-danger bg-opacity-25 fw-bold text-danger border-start border-4 border-danger{% endif %}">
+                        <td class="ps-3 py-2">Obesidad Grado II</td>
+                        <td class="pe-3 py-2 text-end">35.0 - 39.9</td>
+                    </tr>
+
+                    <tr class="{% if current_bmi and current_bmi >= 40 %}bg-dark bg-opacity-10 fw-bold text-dark border-start border-4 border-dark{% endif %}">
+                        <td class="ps-3 py-2">Obesidad Grado III</td>
+                        <td class="pe-3 py-2 text-end">&ge; 40.0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3 text-muted fst-italic text-center" style="font-size: 0.7rem;">
+            * Fuente: Organización Mundial de la Salud (OMS)
+        </div>
+
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-primary w-100 rounded-pill" data-bs-dismiss="modal">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
