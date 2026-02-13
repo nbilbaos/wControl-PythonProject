@@ -52,31 +52,53 @@ async function updateChart() {
 function renderChart(apiData) {
     const ctx = document.getElementById('weightChart').getContext('2d');
 
-    const datasets = [{
-        label: 'Peso (kg)',
-        data: apiData.data,
-        borderColor: '#4e73df',
-        backgroundColor: 'rgba(78, 115, 223, 0.05)',
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointBackgroundColor: '#fff',
-        pointBorderWidth: 2,
-        fill: true,
-        tension: 0.3
-    }];
+    // 1. Dataset: META (Primero para que quede al fondo)
+    const datasets = [];
 
-    if (apiData.show_trend && apiData.trendline && apiData.trendline.length > 0) {
+    if (apiData.goal) {
+        // Creamos una línea constante con el valor de la meta
+        const goalLine = new Array(apiData.data.length).fill(apiData.goal);
+        datasets.push({
+            label: 'Meta',
+            data: goalLine,
+            borderColor: '#1cc88a', // Verde
+            borderWidth: 2,
+            borderDash: [6, 4],     // Línea punteada
+            pointRadius: 0,         // Sin puntos
+            pointHoverRadius: 0,
+            fill: false,
+            tension: 0
+        });
+    }
+
+    // 2. Dataset: TENDENCIA
+    if (apiData.show_trend && apiData.trendline.length > 0) {
         datasets.push({
             label: 'Tendencia',
             data: apiData.trendline,
-            borderColor: '#e74a3b',
-            borderDash: [5, 5],
+            borderColor: '#e74a3b', // Rojo
+            borderWidth: 2,
+            borderDash: [3, 3],     // Punteado fino
             pointRadius: 0,
             fill: false,
-            tension: 0,
-            spanGaps: true
+            tension: 0.4            // Suavizado ligero para que se vea orgánica
         });
     }
+
+    // 3. Dataset: PESO REAL (Al final para que quede encima)
+    datasets.push({
+        label: 'Peso',
+        data: apiData.data,
+        borderColor: '#4e73df', // Azul
+        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#4e73df',
+        pointBorderWidth: 2,
+        fill: true,
+        tension: 0.3
+    });
 
     if (myChart) {
         myChart.destroy();
@@ -90,49 +112,55 @@ function renderChart(apiData) {
         },
         options: {
             maintainAspectRatio: false,
-            layout: { padding: { left: 10, right: 25, top: 25, bottom: 0 } },
+            responsive: true,
+
+            // --- CORRECCIÓN DE MÁRGENES ---
+            layout: {
+                padding: {
+                    left: -10,  // Truco: Margen negativo para pegar el eje Y al borde
+                    right: 10,
+                    top: 10,
+                    bottom: 0
+                }
+            },
+
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end', // Leyenda a la derecha
+                    labels: { boxWidth: 10, usePointStyle: true, padding: 15 }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#6e707e',
+                    bodyColor: '#858796',
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    padding: 10
+                }
+            },
+
             scales: {
                 x: {
                     grid: { display: false, drawBorder: false },
-                    ticks: { maxTicksLimit: 7 }
+                    ticks: { maxTicksLimit: 7, maxRotation: 0 }
                 },
                 y: {
                     beginAtZero: false,
-                    grace: '10%', // Zoom inteligente
-                    ticks: {
-                        maxTicksLimit: 5,
-                        padding: 10,
-                        callback: function(value) { return value + ' kg'; }
-                    },
                     grid: {
                         color: "rgb(234, 236, 244)",
-                        zeroLineColor: "rgb(234, 236, 244)",
+                        zeroLineColor: "transparent", // Quita la línea fea del eje 0
                         drawBorder: false,
-                        borderDash: [2],
-                        zeroLineBorderDash: [2]
-                    }
-                }
-            },
-            plugins: {
-                legend: { display: datasets.length > 1 }, // Solo muestra leyenda si hay tendencia
-                tooltip: {
-                    backgroundColor: "rgb(255,255,255)",
-                    bodyColor: "#858796",
-                    titleMarginBottom: 10,
-                    titleColor: '#6e707e',
-                    titleFont: { size: 14 },
-                    borderColor: '#dddfeb',
-                    borderWidth: 1,
-                    xPadding: 15,
-                    yPadding: 15,
-                    displayColors: false,
-                    intersect: false,
-                    mode: 'index',
-                    caretPadding: 10,
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + context.parsed.y + ' kg';
-                        }
+                        borderDash: [2]
+                    },
+                    ticks: {
+                        padding: 10,
+                        maxTicksLimit: 6,
+                        // Simplificamos la etiqueta para ganar espacio
+                        callback: function(value) { return Math.round(value); }
                     }
                 }
             }

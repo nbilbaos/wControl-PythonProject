@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block head %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -13,288 +13,211 @@
      style="display: none;">
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold mb-0">Hola, {{ user.name }}</h2>
-        <p class="text-muted small mb-0">Resumen de tu progreso</p>
+
     </div>
-    <button class="btn btn-primary shadow-sm px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#weightModal">
-        <i class="bi bi-plus-lg"></i> Registrar Peso
+    <button class="btn btn-primary rounded-3 px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#weightModal">
+        <i class="bi bi-plus-lg me-1"></i> Registrar
     </button>
 </div>
 
-<div class="row g-3 mb-3">
-    <div class="col-md-4">
-        <div class="card shadow h-100 p-3 bg-white">
-            <div class="d-flex align-items-center mb-2">
-                <div class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
-                    <i class="bi bi-speedometer2 fs-4"></i>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="pbi-card p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="pbi-header">Peso Actual</div>
+                    <div class="kpi-value">{{ current_weight }} <span class="kpi-unit">kg</span></div>
                 </div>
-                <span class="text-muted text-uppercase fw-bold small">Peso Actual</span>
-            </div>
-            <h1 class="fw-bold mb-0">{{ current_weight }} <span class="fs-5 text-muted fw-normal">kg</span></h1>
-        </div>
-    </div>
-
-    {% set bmi_color = 'bg-light text-dark' %}
-    {% if current_bmi %}
-        {% if current_bmi < 18.5 %}{% set bmi_color = 'text-info' %}{% endif %}
-        {% if current_bmi >= 18.5 and current_bmi < 25 %}{% set bmi_color = 'text-success' %}{% endif %}
-        {% if current_bmi >= 25 and current_bmi < 30 %}{% set bmi_color = 'text-warning' %}{% endif %}
-        {% if current_bmi >= 30 %}{% set bmi_color = 'text-danger' %}{% endif %}
-    {% endif %}
-
-    <div class="col-md-4">
-        <div class="card shadow h-100 p-3 {{ bmi_color }}">
-            <div class="d-flex align-items-center mb-2">
-                <div class="bg-white bg-opacity-50 p-2 rounded-3 me-3">
-                    <i class="bi bi-heart-pulse fs-4"></i>
+                <div class="kpi-icon-bg bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-speedometer2"></i>
                 </div>
-                <span class="text-uppercase fw-bold small ">IMC Actual</span>
             </div>
-            <h1 class="fw-bold mb-0">{{ current_bmi }}</h1>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow h-100 p-3 bg-white">
-            <div class="d-flex align-items-center mb-2">
-                <div class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3">
-                    <i class="bi bi-graph-up-arrow fs-4"></i>
+    <div class="col-6 col-lg-3">
+        <div class="pbi-card p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="pbi-header">IMC</div>
+                    <div class="kpi-value">{{ current_bmi }}</div>
                 </div>
-                <span class="text-muted text-uppercase fw-bold small">Progreso Total</span>
-            </div>
-            <h1 class="fw-bold mb-0 {% if total_change > 0 %}text-danger{% else %}text-success{% endif %}">
-                {% if total_change > 0 %}+{% endif %}{{ total_change }} <span class="fs-5 text-muted fw-normal">kg</span>
-            </h1>
-        </div>
-    </div>
-</div>
-
-{% if weight_goal %}
-<div class="card shadow border-0 mb-3 bg-white">
-    <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h5 class="fw-bold mb-0">Tu Meta: {{ weight_goal }} kg</h5>
-                <p class="text-muted small mb-0">
-                    {% if current_weight > weight_goal %}
-                        Te faltan <strong>{{ kg_remaining }} kg</strong> para bajar.
-                    {% else %}
-                        Te faltan <strong>{{ kg_remaining }} kg</strong> para subir.
-                    {% endif %}
-                </p>
-            </div>
-            <div class="text-end">
-                <span class="badge bg-primary rounded-pill px-3">{{ progress_pct }}% Completado</span>
+                <div class="kpi-icon-bg
+                    {% if current_bmi < 25 %}bg-success text-success
+                    {% elif current_bmi < 30 %}bg-warning text-warning
+                    {% else %}bg-danger text-danger{% endif %} bg-opacity-10">
+                    <i class="bi bi-heart-pulse"></i>
+                </div>
             </div>
         </div>
-
-        <div class="progress rounded-pill" style="height: 25px;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
-                 role="progressbar"
-                 style="width: {{ progress_pct }}%;"
-                 aria-valuenow="{{ progress_pct }}"
-                 aria-valuemin="0"
-                 aria-valuemax="100">
-                 {{ progress_pct }}%
-            </div>
-        </div>
-
-        <div class="d-flex justify-content-between mt-2 small text-muted">
-            <span>Inicio: {{ start_weight if start_weight else '--' }} kg</span>
-            <span>Meta: {{ weight_goal }} kg</span>
-        </div>
     </div>
-</div>
-{% else %}
-<div class="alert alert-light border shadow-sm mb-3 d-flex align-items-center">
-    <i class="bi bi-info-circle-fill text-primary fs-4 me-3"></i>
-    <div>
-        <strong>¿Tienes un objetivo en mente?</strong>
-        Configura tu meta de peso en tu <a href="{{ url_for('main.profile') }}" class="fw-bold">perfil</a> para ver tu progreso aquí.
-    </div>
-</div>
-{% endif %}
 
-<div class="card shadow mb-3">
-    <div class="card-body py-3 d-flex flex-row align-items-center justify-content-between">
-        <h5 class="m-0 fw-bold">Evolución de Peso</h5>
-        <div class="dropdown no-arrow">
-            <a href="#" role="button" data-bs-toggle="modal" data-bs-target="#chartSettingsModal" class="text-secondary">
-                <i class="bi bi-gear-fill fs-5"></i>
-            </a>
-        </div>
-    </div>
-    <div class="card-body mb-3">
-        <div class="chart-area" style="position: relative; height: 400px; width: 100%;">
-            <canvas id="weightChart"></canvas>
-        </div>
-    </div>
-</div>
-
-<div class="card shadow mt-4 mb-3">
-    <div class="card-body">
-        <h5 class="card-title fw-bold">¿Qué es el IMC?</h5>
-        <p class="text-muted">El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable.</p>
-        <h6 class="mt-1 mb-1 fw-bold">Clasificación según la OMS:</h6>
-        <div class="table-responsive">
-            <div class="row g-0 text-center text-white small fw-bold mt-3 flex-nowrap" style="min-height: 90px; min-width: 600px;">
-                {% set ranges = [
-                    {'max': 18.5, 'label': '< 18.5', 'text': 'Bajo Peso', 'bg': '#d6eaff', 'txt': '#000'},
-                    {'min': 18.5, 'max': 25, 'label': '18.5 - 24.9', 'text': 'Normal', 'bg': '#aadd77', 'txt': '#004d00'},
-                    {'min': 25, 'max': 30, 'label': '25.0 - 29.9', 'text': 'Sobrepeso', 'bg': '#ffdd55', 'txt': '#554400'},
-                    {'min': 30, 'max': 35, 'label': '30.0 - 34.9', 'text': 'Obesidad I', 'bg': '#ffaa00', 'txt': '#fff'},
-                    {'min': 35, 'max': 40, 'label': '35.0 - 39.9', 'text': 'Obesidad II', 'bg': '#ff6600', 'txt': '#fff'},
-                    {'min': 40, 'label': '≥ 40', 'text': 'Obesidad III', 'bg': '#dc3545', 'txt': '#fff'}
-                ] %}
-
-                {% for r in ranges %}
-                    <div class="col d-flex flex-column justify-content-center position-relative"
-                         style="background-color: {{ r.bg }}; color: {{ r.txt }} !important;">
-                        <span>{{ r.label }}</span>
-                        <span>{{ r.text }}</span>
-                        {% if current_bmi %}
-                             {% if (r.min is not defined or current_bmi >= r.min) and (r.max is not defined or current_bmi < r.max) %}
-                                <span class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-dark">Tú</span>
-                             {% endif %}
-                        {% endif %}
+    <div class="col-6 col-lg-3">
+        <div class="pbi-card p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="pbi-header">Cambio Total</div>
+                    <div class="kpi-value {% if total_change > 0 %}text-danger{% else %}text-success{% endif %}">
+                        {% if total_change > 0 %}+{% endif %}{{ total_change }} <span class="kpi-unit">kg</span>
                     </div>
+                </div>
+                <div class="kpi-icon-bg bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+        <div class="pbi-card p-3 justify-content-center">
+            <div class="d-flex justify-content-between mb-1">
+                <span class="pbi-header mb-0">Meta: {{ weight_goal }} kg</span>
+                <span class="fw-bold small text-primary">{{ progress_pct }}%</span>
+            </div>
+            <div class="progress rounded-pill" style="height: 10px;">
+                <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: {{ progress_pct }}%"></div>
+            </div>
+            <div class="text-end mt-1">
+                <small class="text-muted extra-small">Faltan {{ kg_remaining }} kg</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 align-items-start">
+
+    <div class="col-lg-8">
+        <div class="pbi-card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Tendencia de Peso</h5>
+                <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="modal" data-bs-target="#chartSettingsModal">
+                    <i class="bi bi-gear-fill text-primary"></i>
+                </button>
+            </div>
+            <div class="chart-container-pbi">
+                <canvas id="weightChart"></canvas>
+            </div>
+        </div>
+
+        <div class="pbi-card p-5">
+            <h6 class="pbi-header mb-2">Escala IMC (OMS)</h6>
+            <p class="text-muted small mb-1 text-center"> El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable.</p>
+            <h6 class="mt-1 mb-2 ">Tu clasificación:</h6>
+            <div class="progress" style="height: 30px; font-size: 0.7rem; font-weight: bold;">
+                <div class="progress-bar" style="width: 18.5%; background: #d6eaff; color: #333;">Bajo</div>
+                <div class="progress-bar" style="width: 25%; background: #aadd77; color: #004d00;">Normal</div>
+                <div class="progress-bar" style="width: 20%; background: #ffdd55; color: #554400;">Sobrepeso</div>
+                <div class="progress-bar" style="width: 15%; background: #ffaa00;">Ob. I</div>
+                <div class="progress-bar" style="width: 10%; background: #ff6600;">Ob. II</div>
+                <div class="progress-bar" style="width: 11.5%; background: #dc3545;">Ob. III</div>
+            </div>
+            {% if current_bmi %}
+            <div class="position-relative mt-1" style="height: 20px;">
+                {% set position_pct = (current_bmi / 45) * 100 %}
+                {% if position_pct > 100 %}{% set position_pct = 100 %}{% endif %}
+                <div class="position-absolute translate-middle-x text-center" style="left: {{ position_pct }}%; transition: left 1s;">
+                    <i class="bi bi-caret-up-fill text-dark"></i>
+                    <span class="badge bg-dark rounded-pill d-block">Tú</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+
+        <div class="pbi-card overflow-hidden mb-3">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                <h6 class="fw-bold mb-0">Últimos Registros</h6>
+                <a href="{{ url_for('main.full_history') }}" class="text-decoration-none small">Ver todo</a>
+            </div>
+
+            <div class="history-panel">
+                <table class="table table-hover table-pbi align-middle mb-0 small">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-3 border-0">Fecha</th>
+                            <th class="border-0">Peso</th>
+                            <th class="border-0">Var.</th> <th class="text-end pe-3 border-0"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in weight_history %}
+                        <tr>
+                            <td class="ps-3 text-muted">{{ entry.recorded_date.strftime('%d/%m') }}</td>
+
+                            <td class="fw-bold">{{ entry.weight }}</td>
+
+                            <td>
+                                {% if entry.variation is not none %}
+                                    {% if entry.variation < 0 %}
+                                        <span class="text-success fw-bold" style="font-size: 0.85rem;">
+                                            <i class="bi bi-caret-down-fill small"></i> {{ entry.variation|abs }}
+                                        </span>
+                                    {% elif entry.variation > 0 %}
+                                        <span class="text-danger fw-bold" style="font-size: 0.85rem;">
+                                            <i class="bi bi-caret-up-fill small"></i> {{ entry.variation }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted fw-bold">=</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-light text-secondary border" style="font-size: 0.7rem;">Inicio</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end pe-3">
+                                <div class="btn-group">
+                                    <button class="btn btn-link p-0 text-secondary me-2"
+                                            data-bs-toggle="modal" data-bs-target="#editWeightModal"
+                                            data-url="{{ url_for('main.edit_weight', entry_id=entry._id) }}"
+                                            data-weight="{{ entry.weight }}" data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn btn-link p-0 text-danger opacity-50 hover-opacity-100"
+                                            data-bs-toggle="modal" data-bs-target="#deleteWeightModal"
+                                            data-url="{{ url_for('main.delete_weight', entry_id=entry._id) }}"
+                                            data-weight="{{ entry.weight }}" data-date="{{ entry.recorded_date.strftime('%d/%m/%Y') }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pbi-card p-3">
+            <h6 class="pbi-header mb-3">Medallas</h6>
+            <div class="achievement-grid">
+                {% for key, meta in [('bronce', '25%'), ('plata', '50%'), ('oro', '75%'), ('campeon', '100%')] %}
+                <div class="achievement-mini {% if logros[key] %}active{% endif %}">
+                    <i class="bi {% if key == 'campeon' %}bi-trophy-fill text-primary{% else %}bi-medal-fill{% endif %} fs-4
+                              {% if key == 'bronce' %}text-warning{% elif key == 'plata' %}text-secondary{% elif key == 'oro' %}text-warning{% endif %}"
+                              style="filter: {% if key == 'bronce' %}sepia(0.5){% endif %};"></i>
+                    <div class="fw-bold mt-1 small">{{ meta }}</div>
+                </div>
                 {% endfor %}
             </div>
         </div>
-    </div>
-</div>
 
-<div class="card shadow border-0 mb-3 bg-white">
-    <div class="card-header bg-white border-0 py-3">
-        <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-trophy text-warning me-2"></i> Logros del Camino</h5>
-    </div>
-    <div class="card-body p-4">
-        <div class="row text-center g-2">
-            {% for key, meta in [('bronce', '25%'), ('plata', '50%'), ('oro', '75%'), ('campeon', '100%')] %}
-            <div class="col-3">
-                <div class="achievement-wrapper {% if logros[key] %}active{% endif %}" id="medal-{{ key }}">
-                    <div class="icon-circle shadow-sm">
-                        <i class="bi {% if key == 'campeon' %}bi-trophy-fill{% else %}bi-medal-fill{% endif %}"></i>
-                    </div>
-                    <p class="small fw-bold mt-2 mb-0">{{ meta }}</p>
-                    <span class="text-muted extra-small">{{ key|capitalize }}</span>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
-    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
-        <h5 class="fw-bold text-dark mb-0">Historial Reciente</h5>
-        <a href="{{ url_for('main.full_history') }}" class="text-decoration-none small fw-bold text-primary">
-            Ver todo <i class="bi bi-arrow-right ms-1"></i>
-        </a>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="bg-light text-secondary small text-uppercase">
-                <tr>
-                    <th class="ps-4 py-3 fw-bold border-0">Fecha</th>
-                    <th class="py-3 fw-bold border-0">Peso</th>
-                    <th class="py-3 fw-bold border-0">Variación</th>
-                    <th class="py-3 fw-bold border-0">IMC</th>
-                    <th class="text-end pe-4 py-3 fw-bold border-0"></th> </tr>
-            </thead>
-            <tbody>
-                {% for entry in weight_history %}
-                <tr class="position-relative">
-                    <td class="ps-4 py-1">
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold text-dark">{{ entry.recorded_date.strftime('%d %b') }}</span>
-                            <span class="small text-muted" style="font-size: 0.75rem;">{{ entry.recorded_date.strftime('%Y') }}</span>
-                        </div>
-                    </td>
 
-                    <td>
-                        <span class="fw-bolder h6 mb-0 text-primary">{{ entry.weight }} <small class="text-muted fw-normal">kg</small></span>
-                    </td>
-
-                    <td>
-                        {% if entry.variation is not none %}
-                            {% if entry.variation < 0 %}
-                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3 py-2 border border-success border-opacity-10">
-                                    <i class="bi bi-arrow-down-short me-1"></i>{{ entry.variation|abs }}
-                                </span>
-                            {% elif entry.variation > 0 %}
-                                <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger px-3 py-2 border border-danger border-opacity-10">
-                                    <i class="bi bi-arrow-up-short me-1"></i>{{ entry.variation }}
-                                </span>
-                            {% else %}
-                                <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2">
-                                    <i class="bi bi-dash me-1"></i>0.0
-                                </span>
-                            {% endif %}
-                        {% else %}
-                            <span class="badge rounded-pill bg-light text-muted border px-3">Inicio</span>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if entry.imc %}
-                            <div class="d-flex align-items-center">
-                                <span class="d-inline-block rounded-circle me-2"
-                                      style="width: 8px; height: 8px; background-color:
-                                      {% if entry.imc < 18.5 %}#17a2b8
-                                      {% elif entry.imc < 25 %}#198754
-                                      {% elif entry.imc < 30 %}#ffc107
-                                      {% else %}#dc3545{% endif %};">
-                                </span>
-                                <span class="fw-bold text-dark">{{ entry.imc }}</span>
-                            </div>
-                        {% else %}
-                            <span class="text-muted small">--</span>
-                        {% endif %}
-                    </td>
-
-                    <td class="text-end pe-4">
-                        <div class="btn-group">
-                            <button class="btn btn-icon btn-sm text-secondary hover-primary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editWeightModal"
-                                    data-url="{{ url_for('main.edit_weight', entry_id=entry._id) }}"
-                                    data-weight="{{ entry.weight }}"
-                                    data-date="{{ entry.recorded_date.strftime('%Y-%m-%d') }}"
-                                    title="Editar">
-                                <i class="bi bi-pencil-square fs-6"></i>
-                            </button>
-
-                            <button class="btn btn-icon btn-sm text-secondary hover-danger ms-2"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#deleteWeightModal"
-                                    data-url="{{ url_for('main.delete_weight', entry_id=entry._id) }}"
-                                    data-weight="{{ entry.weight }}"
-                                    data-date="{{ entry.recorded_date.strftime('%d/%m/%Y') }}"
-                                    title="Eliminar">
-                                <i class="bi bi-trash fs-6"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
 </div>
 
 {% include 'main/partials/dashboard_modals.html' %}
 
 {% endblock %}
+
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-<script src="{{ url_for('static', filename='js/dashboard_interactions.js') }}"></script>
-<script src="{{ url_for('static', filename='js/dashboard_chart.js') }}"></script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_interactions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_chart.js') }}"></script>
 {% endblock %}

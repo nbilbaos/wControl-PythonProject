@@ -1,4 +1,4 @@
-import pymongo
+
 from flask import jsonify, request, session, current_app
 from app.main import main_bp
 from app.decorators import login_required
@@ -37,46 +37,70 @@ def calculate_trendline(data):
 @main_bp.route('/api/chart-data')
 @login_required
 def get_chart_data():
-    user_id = session['user_id']
-    filter_type = request.args.get('filter', '1m')  # '1m', 'all', 'custom'
+    # 1. Obtener Usuario y Meta
+    user = current_app.db.users.find_one({'_id': ObjectId(session['user_id'])})
+    profile = user.get('profile', {})
+    weight_goal = profile.get('weight_goal')  # Meta
+
+    # 2. Filtros de Fecha
+    time_filter = request.args.get('filter', '1m')
     start_date_str = request.args.get('start_date')
     end_date_str = request.args.get('end_date')
 
-    query = {'user_id': user_id}
+    query = {'user_id': session['user_id']}
+    now = datetime.now()
 
-    # Lógica de Filtrado
-    if filter_type == '1m':
-        last_month = datetime.now() - timedelta(days=30)
-        query['recorded_date'] = {'$gte': last_month}
-    elif filter_type == 'custom' and start_date_str:
+    if time_filter == '1m':
+        query['recorded_date'] = {'$gte': now - timedelta(days=30)}
+    elif time_filter == '3m':
+        query['recorded_date'] = {'$gte': now - timedelta(days=90)}
+    elif time_filter == 'custom' and start_date_str:
         try:
-            start = datetime.strptime(start_date_str, '%Y-%m-%d')
-            # Si hay fecha fin la usamos, si no, hasta hoy
-            end = datetime.strptime(end_date_str, '%Y-%m-%d') if end_date_str else datetime.now()
-            query['recorded_date'] = {'$gte': start, '$lte': end}
-        except ValueError:
-            pass  # Si falla el formato, devuelve todo o maneja error
-    # Si es 'all', no agregamos filtro de fecha, trae todo.
+            s = datetime.strptime(start_date_str, '%Y-%m-%d')
+            e = datetime.strptime(end_date_str, '%Y-%m-%d') if end_date_str else now
+            query['recorded_date'] = {'$gte': s, '$lte': e.replace(hour=23, minute=59)}
+        except:
+            pass
 
-    # Consulta a BD (Orden Ascendente para el gráfico: antiguo -> nuevo)
-    cursor = current_app.db.weight_entries.find(query).sort('recorded_date', pymongo.ASCENDING)
-    entries = list(cursor)
+    # 3. Obtener Datos (Ordenados por fecha antigua -> nueva)
+    data = list(current_app.db.weight_entries.find(query).sort('recorded_date', 1))
 
-    if not entries:
-        return jsonify({'labels': [], 'data': [], 'trendline': []})
+    labels = []
+    weights = []
 
-    # Preparar datos para Chart.js
-    labels = [e['recorded_date'].strftime('%Y-%m-%d') for e in entries]
-    weights = [e['weight'] for e in entries]
+    for entry in data:
+        # Formato corto para el eje X (ahorra espacio)
+        labels.append(entry['recorded_date'].strftime('%d/%m'))
+        weights.append(entry['weight'])
 
-    trendline_data = []
-    # Solo calculamos tendencia si el usuario pide ver TODO el historial
-    if filter_type == 'all':
-        trendline_data = calculate_trendline(entries)
+    # 4. CÁLCULO DE TENDENCIA (Basado en Índices para línea recta visual)
+    trendline = []
+    if len(weights) > 1:
+        # Usamos índices simples (0, 1, 2...) como eje X
+        n = len(weights)
+        x_indices = list(range(n))
+
+        sum_x = sum(x_indices)
+        sum_y = sum(weights)
+        sum_xy = sum(x * y for x, y in zip(x_indices, weights))
+        sum_xx = sum(x * x for x in x_indices)
+
+        # Pendiente (m) y punto de corte (b)
+        try:
+            m = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x ** 2)
+            b = (sum_y - m * sum_x) / n
+
+            # Generar puntos de la línea
+            for x in x_indices:
+                val = m * x + b
+                trendline.append(round(val, 2))
+        except ZeroDivisionError:
+            trendline = []
 
     return jsonify({
         'labels': labels,
         'data': weights,
-        'trendline': trendline_data,  # Será una lista vacía si no es 'all'
-        'show_trend': filter_type == 'all'
+        'trendline': trendline,
+        'goal': weight_goal,  # Enviamos la meta
+        'show_trend': len(trendline) > 0
     })
