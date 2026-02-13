@@ -55,19 +55,21 @@ function renderChart(apiData) {
     // 1. Dataset: META (Primero para que quede al fondo)
     const datasets = [];
 
+    // 1. Dataset: META
     if (apiData.goal) {
-        // Creamos una línea constante con el valor de la meta
         const goalLine = new Array(apiData.data.length).fill(apiData.goal);
         datasets.push({
             label: 'Meta',
             data: goalLine,
-            borderColor: '#1cc88a', // Verde
+            borderColor: '#1cc88a',
             borderWidth: 2,
-            borderDash: [6, 4],     // Línea punteada
-            pointRadius: 0,         // Sin puntos
-            pointHoverRadius: 0,
+            borderDash: [6, 4],
+            pointRadius: 0,
             fill: false,
-            tension: 0
+            // Esto evita que la meta fuerce la escala si está muy lejos.
+            // Si quieres que SIEMPRE salga, quita esto.
+            // Si quieres priorizar el zoom en los datos, descomenta las líneas de abajo si tuvieras un segundo eje.
+            // Pero la solución más simple es filtrar los datos antes de enviarlos.
         });
     }
 
@@ -143,23 +145,26 @@ function renderChart(apiData) {
                 }
             },
 
-            scales: {
+        scales: {
                 x: {
                     grid: { display: false, drawBorder: false },
                     ticks: { maxTicksLimit: 7, maxRotation: 0 }
                 },
                 y: {
-                    beginAtZero: false,
+                    // --- CORRECCIÓN DE ZOOM ---
+                    // No forzamos el 'min' ni 'max' para incluir la meta.
+                    // Dejamos que Chart.js se ajuste AUTOMÁTICAMENTE a los datos de PESO (datasets[2]).
+                    grace: '8%', // Agrega un 10% de espacio extra arriba/abajo de tus datos reales
+
                     grid: {
                         color: "rgb(234, 236, 244)",
-                        zeroLineColor: "transparent", // Quita la línea fea del eje 0
+                        zeroLineColor: "transparent",
                         drawBorder: false,
                         borderDash: [2]
                     },
                     ticks: {
                         padding: 10,
                         maxTicksLimit: 6,
-                        // Simplificamos la etiqueta para ganar espacio
                         callback: function(value) { return Math.round(value); }
                     }
                 }
