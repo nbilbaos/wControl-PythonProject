@@ -57,20 +57,29 @@ function renderChart(apiData) {
 
     // 1. Dataset: META
     if (apiData.goal) {
-        const goalLine = new Array(apiData.data.length).fill(apiData.goal);
-        datasets.push({
-            label: 'Meta',
-            data: goalLine,
-            borderColor: '#1cc88a',
-            borderWidth: 2,
-            borderDash: [6, 4],
-            pointRadius: 0,
-            fill: false,
-            // Esto evita que la meta fuerce la escala si está muy lejos.
-            // Si quieres que SIEMPRE salga, quita esto.
-            // Si quieres priorizar el zoom en los datos, descomenta las líneas de abajo si tuvieras un segundo eje.
-            // Pero la solución más simple es filtrar los datos antes de enviarlos.
-        });
+        // Calculamos min y max de los datos actuales
+        const minWeight = Math.min(...apiData.data);
+        const maxWeight = Math.max(...apiData.data);
+
+        // Solo mostramos la meta si está "razonablemente cerca" (ej: dentro de un rango de 15kg del dato visible)
+        // O si el usuario quiere verla sí o sí, puedes quitar este IF.
+        // Pero para solucionar tu problema de zoom, esto es lo mejor:
+
+        const isGoalClose = (apiData.goal >= minWeight - 15) && (apiData.goal <= maxWeight + 15);
+
+        if (isGoalClose) {
+            const goalLine = new Array(apiData.data.length).fill(apiData.goal);
+            datasets.push({
+                label: 'Meta',
+                data: goalLine,
+                borderColor: '#1cc88a',
+                borderWidth: 2,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                fill: false,
+                tension: 0
+            });
+        }
     }
 
     // 2. Dataset: TENDENCIA

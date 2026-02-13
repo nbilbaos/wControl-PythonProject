@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Cambios dashboard.html" />
+    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Correciones Goal Gráfico">
+      <change beforePath="$PROJECT_DIR$/app/static/js/dashboard_chart.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/dashboard_chart.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -94,7 +96,7 @@
       <workItem from="1769974352795" duration="759000" />
       <workItem from="1770325221214" duration="55000" />
       <workItem from="1770899068303" duration="26058000" />
-      <workItem from="1770991880388" duration="6791000" />
+      <workItem from="1770991880388" duration="7171000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -368,14 +370,21 @@
       <option name="project" value="LOCAL" />
       <updated>1771000358291</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Correciones Goal Gráfico">
+      <option name="closed" value="true" />
+      <created>1771000973937</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1771000973937</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Mejoras visuales" />
     <MESSAGE value="Correciones varias" />
     <MESSAGE value="Efectos al conseguir logros" />
     <MESSAGE value="Mejoras en panel administrador" />
@@ -400,11 +409,12 @@
     <MESSAGE value="Cambios Register y login" />
     <MESSAGE value="Cambios Register" />
     <MESSAGE value="Cambios dashboard.html" />
-    <option name="LAST_COMMIT_MESSAGE" value="Cambios dashboard.html" />
+    <MESSAGE value="Correciones Goal Gráfico" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correciones Goal Gráfico" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PythonProject$create_admin.coverage" NAME="create_admin Coverage Results" MODIFIED="1769096939916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/PythonProject$run.coverage" NAME="run Coverage Results" MODIFIED="1770995783081" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/PythonProject$run.coverage" NAME="run Coverage Results" MODIFIED="1771001156596" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/PythonProject$routes.coverage" NAME="routes Coverage Results" MODIFIED="1769451196292" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app/main" />
   </component>
 </project>
