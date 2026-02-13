@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Correciones Goal Gráfico">
-      <change beforePath="$PROJECT_DIR$/app/static/js/dashboard_chart.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/dashboard_chart.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/dashboard.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +96,7 @@
       <workItem from="1769974352795" duration="759000" />
       <workItem from="1770325221214" duration="55000" />
       <workItem from="1770899068303" duration="26058000" />
-      <workItem from="1770991880388" duration="7171000" />
+      <workItem from="1770991880388" duration="7591000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -378,7 +378,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771000973937</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="Correciones Goal Gráfico">
+      <option name="closed" value="true" />
+      <created>1771001185660</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1771001185660</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

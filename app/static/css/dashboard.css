@@ -28,7 +28,7 @@
 
 /* Opcional: Ajuste de padding en las tarjetas para reducir aire innecesario */
 .pbi-card.p-4 {
-    padding: 1.25rem !important; /* Reduce el padding interno general */
+    padding: 1rem !important; /* Reduce el padding interno general */
 }
 
 /* --- 2. KPI CARDS (Tarjetas Superiores) --- */

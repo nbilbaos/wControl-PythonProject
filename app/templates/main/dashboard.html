@@ -101,28 +101,67 @@
             </div>
         </div>
 
-        <div class="pbi-card p-5">
-            <h6 class="pbi-header mb-2">Escala IMC (OMS)</h6>
-            <p class="text-muted small mb-1 text-center"> El Índice de Masa Corporal (IMC) es una medida utilizada para determinar si una persona tiene un peso saludable.</p>
-            <h6 class="mt-1 mb-2 ">Tu clasificación:</h6>
-            <div class="progress" style="height: 30px; font-size: 0.7rem; font-weight: bold;">
-                <div class="progress-bar" style="width: 18.5%; background: #d6eaff; color: #333;">Bajo</div>
-                <div class="progress-bar" style="width: 25%; background: #aadd77; color: #004d00;">Normal</div>
-                <div class="progress-bar" style="width: 20%; background: #ffdd55; color: #554400;">Sobrepeso</div>
-                <div class="progress-bar" style="width: 15%; background: #ffaa00;">Ob. I</div>
-                <div class="progress-bar" style="width: 10%; background: #ff6600;">Ob. II</div>
-                <div class="progress-bar" style="width: 11.5%; background: #dc3545;">Ob. III</div>
+        <div class="pbi-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="pbi-header mb-0">Estado de Salud (IMC)</h6>
+                <span class="badge bg-light text-secondary rounded-pill fw-normal border">OMS</span>
             </div>
+
             {% if current_bmi %}
-            <div class="position-relative mt-1" style="height: 20px;">
-                {% set position_pct = (current_bmi / 45) * 100 %}
-                {% if position_pct > 100 %}{% set position_pct = 100 %}{% endif %}
-                <div class="position-absolute translate-middle-x text-center" style="left: {{ position_pct }}%; transition: left 1s;">
-                    <i class="bi bi-caret-up-fill text-dark"></i>
-                    <span class="badge bg-dark rounded-pill d-block">Tú</span>
-                </div>
+            <div class="text-center mb-4">
+                <h2 class="display-6 fw-bold mb-0"
+                    style="color: {% if current_bmi < 18.5 %}#6cb2eb
+                                  {% elif current_bmi < 25 %}#38c172
+                                  {% elif current_bmi < 30 %}#ffed4a
+                                  {% elif current_bmi < 35 %}#f6993f
+                                  {% elif current_bmi < 40 %}#e3342f
+                                  {% else %}#751a26{% endif %};">
+                    {{ current_bmi }}
+                </h2>
+                <p class="text-muted small fw-bold text-uppercase ls-1">
+                    {% if current_bmi < 18.5 %}Bajo Peso
+                    {% elif current_bmi < 25 %}Peso Normal
+                    {% elif current_bmi < 30 %}Sobrepeso
+                    {% elif current_bmi < 35 %}Obesidad I
+                    {% elif current_bmi < 40 %}Obesidad II
+                    {% else %}Obesidad III{% endif %}
+                </p>
             </div>
             {% endif %}
+
+            <div class="position-relative mx-2">
+                <div class="progress rounded-pill shadow-sm" style="height: 12px; overflow: visible; background: #e9ecef;">
+                    <div class="w-100 h-100 rounded-pill"
+                         style="background: linear-gradient(to right,
+                         #6cb2eb 0%, #6cb2eb 18.5%,
+                         #38c172 18.5%, #38c172 40%,
+                         #ffed4a 40%, #ffed4a 55%,
+                         #f6993f 55%, #f6993f 70%,
+                         #e3342f 70%, #e3342f 100%);">
+                    </div>
+                </div>
+
+                {% if current_bmi %}
+                    {% set max_bmi = 50 %} {% set position_pct = (current_bmi / max_bmi) * 100 %}
+                    {% if position_pct > 100 %}{% set position_pct = 100 %}{% elif position_pct < 0 %}{% set position_pct = 0 %}{% endif %}
+
+                    <div class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none">
+                        <div class="position-absolute top-50 translate-middle"
+                             style="left: {{ position_pct }}%; transition: left 1s ease-out;">
+                            <div class="bg-white rounded-circle shadow border border-2 border-dark"
+                                 style="width: 20px; height: 20px; margin-top: -1px;"></div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex justify-content-between text-muted mt-2" style="font-size: 0.65rem; font-weight: 600;">
+                <span>0</span>
+                <span>18.5</span>
+                <span>25</span>
+                <span>30</span>
+                <span>40+</span>
+            </div>
         </div>
     </div>
 
