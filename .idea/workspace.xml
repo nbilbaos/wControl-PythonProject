@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Correciones Goal Gráfico">
+    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Cambios IMC">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/css/dashboard.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/dashboard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/main/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/main/dashboard.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,7 +98,7 @@
       <workItem from="1769974352795" duration="759000" />
       <workItem from="1770325221214" duration="55000" />
       <workItem from="1770899068303" duration="26058000" />
-      <workItem from="1770991880388" duration="7591000" />
+      <workItem from="1770991880388" duration="8298000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -386,14 +388,21 @@
       <option name="project" value="LOCAL" />
       <updated>1771001185660</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Cambios IMC">
+      <option name="closed" value="true" />
+      <created>1771001804474</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1771001804474</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Correciones varias" />
     <MESSAGE value="Efectos al conseguir logros" />
     <MESSAGE value="Mejoras en panel administrador" />
     <MESSAGE value="Funcionalidades Admin" />
@@ -418,7 +427,8 @@
     <MESSAGE value="Cambios Register" />
     <MESSAGE value="Cambios dashboard.html" />
     <MESSAGE value="Correciones Goal Gráfico" />
-    <option name="LAST_COMMIT_MESSAGE" value="Correciones Goal Gráfico" />
+    <MESSAGE value="Cambios IMC" />
+    <option name="LAST_COMMIT_MESSAGE" value="Cambios IMC" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PythonProject$create_admin.coverage" NAME="create_admin Coverage Results" MODIFIED="1769096939916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

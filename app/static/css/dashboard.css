@@ -110,3 +110,49 @@
     border: 1px solid rgba(0,0,0,0.05);
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+/* --- 6. FLOATING ACTION BUTTON (FAB) --- */
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000; /* Asegura que flote sobre todo */
+}
+
+.btn-fab {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    /* Azul primario con transparencia (0.65) */
+    background: rgba(13, 110, 253, 0.65);
+    /* Efecto de vidrio borroso detrás del botón */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-fab:hover {
+    /* Al pasar el mouse se vuelve sólido y crece un poco */
+    background: rgba(13, 110, 253, 1);
+    transform: translateY(-5px) scale(1.1);
+    box-shadow: 0 10px 20px rgba(13, 110, 253, 0.4);
+    color: white;
+}
+
+/* Animación de entrada suave */
+.btn-fab i {
+    transition: transform 0.3s ease;
+}
+
+.btn-fab:hover i {
+    transform: rotate(90deg); /* El signo + gira al pasar el mouse */
+}
