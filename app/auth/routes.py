@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from app.auth.forms import RegistrationForm, LoginForm
-from bson.objectid import ObjectId
+
 
 # Definimos el Blueprint
 auth_bp = Blueprint('auth', __name__)
@@ -71,7 +71,6 @@ def login():
     # 1. Instanciamos el formulario (Esto soluciona el error 'form undefined')
     form = LoginForm()
 
-
     # 3. Validación del Formulario
     if form.validate_on_submit():
         email = form.email.data
@@ -88,9 +87,6 @@ def login():
             # IMPORTANTE: Recuperamos el nombre para el menú superior
             session['name'] = user.get('name', 'Usuario')
             session['is_admin'] = user.get('is_admin', False)
-
-            flash(f'Bienvenido de nuevo, {user.get("name")}', 'success')
-
             # Redirección inteligente: Si es admin va al panel, si no al dashboard
             if session['is_admin']:
                 return redirect(url_for('admin.panel'))

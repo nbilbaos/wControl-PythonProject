@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Información IMC" />
+    <list default="true" id="612eca07-754c-4bcf-8d5f-4b548d669404" name="Changes" comment="Correción botón add para safari">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/auth/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/auth/routes.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -94,7 +97,7 @@
       <workItem from="1769974352795" duration="759000" />
       <workItem from="1770325221214" duration="55000" />
       <workItem from="1770899068303" duration="26058000" />
-      <workItem from="1770991880388" duration="9827000" />
+      <workItem from="1770991880388" duration="10978000" />
     </task>
     <task id="LOCAL-00001" summary="v0">
       <option name="closed" value="true" />
@@ -408,14 +411,21 @@
       <option name="project" value="LOCAL" />
       <updated>1771004357945</updated>
     </task>
-    <option name="localTasksCounter" value="40" />
+    <task id="LOCAL-00040" summary="Correción botón add para safari">
+      <option name="closed" value="true" />
+      <created>1771004806161</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1771004806161</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Funcionalidades Admin" />
     <MESSAGE value="Se añade funcionalidad de descargar pdf de historial" />
     <MESSAGE value="Correciones redirección editar eliminar en historial" />
     <MESSAGE value="Se añadió pie de página" />
@@ -440,7 +450,8 @@
     <MESSAGE value="Cambios IMC" />
     <MESSAGE value="Nuevo botón ADD" />
     <MESSAGE value="Información IMC" />
-    <option name="LAST_COMMIT_MESSAGE" value="Información IMC" />
+    <MESSAGE value="Correción botón add para safari" />
+    <option name="LAST_COMMIT_MESSAGE" value="Correción botón add para safari" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/PythonProject$create_admin.coverage" NAME="create_admin Coverage Results" MODIFIED="1769096939916" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
