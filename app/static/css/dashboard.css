@@ -122,6 +122,9 @@
     /* CORRECCIÓN 2: Forzar aceleración de hardware para evitar glitches visuales en iOS */
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    /* NUEVO: Hace que el empuje del footer se sienta suave */
+    transition: transform 0.1s ease-out;
+    will-change: transform;
 }
 
 .btn-fab {

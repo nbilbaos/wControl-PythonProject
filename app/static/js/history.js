@@ -120,10 +120,33 @@ function generateMedicalPDF() {
     }).catch(err => {
         console.error("Error generando PDF:", err);
 
-        // Restaurar todo también en caso de que falle la generación
+        // Restaurartodo también en caso de que falle la generación
         if (currentTheme) htmlEl.setAttribute('data-bs-theme', currentTheme);
         element.classList.remove('printing-mode');
         noPrintElements.forEach(el => el.style.display = '');
         if (printFooter) printFooter.style.display = 'none';
     });
 }
+document.addEventListener('DOMContentLoaded', function() {
+    const fabContainer = document.querySelector('.fab-container');
+    // Busca tu footer (ajusta el selector si tu footer tiene otra clase/ID)
+    const footer = document.querySelector('footer') || document.querySelector('.footer');
+
+    if (fabContainer && footer) {
+        window.addEventListener('scroll', () => {
+            const footerRect = footer.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (footerRect.top < windowHeight) {
+                // El footer está visible, calculamos cuánto empujar
+                const overlap = windowHeight - footerRect.top;
+
+                // Usamos translate3d para subirlo (eje Y) y mantener el parche de iOS (eje Z)
+                fabContainer.style.transform = `translate3d(0, -${overlap}px, 0)`;
+            } else {
+                // El footer no se ve, devolvemos el botón a su lugar original
+                fabContainer.style.transform = 'translate3d(0, 0, 0)';
+            }
+        });
+    }
+});
