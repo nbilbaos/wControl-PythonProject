@@ -111,6 +111,11 @@ function renderChart(apiData) {
         tension: 0.3
     });
 
+    // --- NUEVO: Detectar tema antes de dibujar ---
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+    const textColor = currentTheme === 'dark' ? '#adb5bd' : '#858796';
+    const gridColor = currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgb(234, 236, 244)';
+
     if (myChart) {
         myChart.destroy();
     }
@@ -124,6 +129,7 @@ function renderChart(apiData) {
         options: {
             maintainAspectRatio: false,
             responsive: true,
+
 
             // --- CORRECCIÓN DE MÁRGENES ---
             layout: {
@@ -139,8 +145,13 @@ function renderChart(apiData) {
                 legend: {
                     display: true,
                     position: 'top',
-                    align: 'end', // Leyenda a la derecha
-                    labels: { boxWidth: 10, usePointStyle: true, padding: 15 }
+                    align: 'end',
+                    labels: {
+                        boxWidth: 10,
+                        usePointStyle: true,
+                        padding: 15,
+                        color: textColor // <--- APLICAR AQUÍ
+                    }
                 },
                 tooltip: {
                     mode: 'index',
@@ -157,7 +168,7 @@ function renderChart(apiData) {
         scales: {
                 x: {
                     grid: { display: false, drawBorder: false },
-                    ticks: { maxTicksLimit: 7, maxRotation: 0 }
+                    ticks: { maxTicksLimit: 7, maxRotation: 0, color: textColor}
                 },
                 y: {
                     // --- CORRECCIÓN DE ZOOM ---
@@ -174,6 +185,7 @@ function renderChart(apiData) {
                     ticks: {
                         padding: 10,
                         maxTicksLimit: 6,
+                        color: textColor,
                         callback: function(value) { return Math.round(value); }
                     }
                 }
@@ -181,3 +193,35 @@ function renderChart(apiData) {
         }
     });
 }
+// ESCUCHAR CAMBIO DE TEMA PARA ACTUALIZAR EL GRÁFICO
+window.addEventListener('themeChanged', function(e) {
+    if (myChart) {
+        const theme = e.detail.theme;
+
+        // Definir colores según el tema
+        const textColor = theme === 'dark' ? '#adb5bd' : '#858796';
+        const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgb(234, 236, 244)';
+
+        // Actualizar opciones
+        myChart.options.scales.x.ticks.color = textColor;
+        myChart.options.scales.y.ticks.color = textColor;
+        myChart.options.scales.y.grid.color = gridColor;
+        myChart.options.plugins.legend.labels.color = textColor;
+
+        // Actualizar tooltip para modo oscuro
+        if (theme === 'dark') {
+            myChart.options.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            myChart.options.plugins.tooltip.titleColor = '#fff';
+            myChart.options.plugins.tooltip.bodyColor = '#ccc';
+            myChart.options.plugins.tooltip.borderColor = '#333';
+        } else {
+            myChart.options.plugins.tooltip.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+            myChart.options.plugins.tooltip.titleColor = '#6e707e';
+            myChart.options.plugins.tooltip.bodyColor = '#858796';
+            myChart.options.plugins.tooltip.borderColor = '#dddfeb';
+        }
+
+        // Re-dibujar
+        myChart.update();
+    }
+});

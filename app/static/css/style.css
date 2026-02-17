@@ -1,9 +1,10 @@
-/* app/static/css/style.css */
-
-/* Fuente y Fondo Global */
+/* =========================================
+   1. ESTILOS GLOBALES (Modo Claro por Defecto)
+   ========================================= */
 body {
     font-family: 'Poppins', sans-serif;
     background-color: #f5f8f8;
+    transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave */
 }
 
 /* Estilos Globales para Tarjetas (Sobreescribe Bootstrap) */
@@ -13,13 +14,12 @@ body {
     border-radius: 12px;
 }
 
-/* Enlaces del Footer */
+/* Enlaces del Footer e Iconos */
 .hover-link:hover {
     color: #0d6efd !important;
     text-decoration: underline !important;
 }
 
-/* Iconos Sociales con efecto Hover */
 .social-hover {
     transition: all 0.3s ease;
 }
@@ -31,12 +31,11 @@ body {
     border-color: #0d6efd !important;
 }
 
-/* app/static/css/history.css */
-
-/* --- Estilos Generales --- */
+/* =========================================
+   2. ESTILOS DE HISTORIAL Y REPORTES
+   ========================================= */
 .ls-1 { letter-spacing: 1px; }
 
-/* Tabla Slim */
 .report-table thead th {
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -51,44 +50,66 @@ body {
     padding-bottom: 0.4rem;
 }
 
-/* Tarjeta de Resumen */
 .medical-summary {
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
 }
 
-/* --- MODO IMPRESIÓN (PDF) --- */
-.printing-mode {
-    /* Quitar sombras y bordes redondeados para que parezca papel */
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    background-color: white !important;
+/* =========================================
+   3. MODO OSCURO GLOBAL (Dark Mode)
+   ========================================= */
+[data-bs-theme="dark"] body {
+    background-color: #121212;
+    color: #e9ecef;
 }
 
-.printing-mode .medical-summary {
-    /* Fondo blanco en impresión para ahorrar tinta y verse limpio */
-    background-color: #fff !important;
-    border: 1px solid #000 !important; /* Borde negro fino */
+/* Forzar fondos claros de Bootstrap y Tarjetas a oscuros */
+[data-bs-theme="dark"] .bg-white { background-color: #1e1e1e !important; }
+[data-bs-theme="dark"] .bg-light { background-color: #2a2a2a !important; color: #adb5bd !important; }
+[data-bs-theme="dark"] .text-dark { color: #f8f9fa !important; }
+
+[data-bs-theme="dark"] .card {
+    background-color: #1e1e1e;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-.printing-mode .table-striped > tbody > tr:nth-of-type(odd) > * {
-    /* Quitar el gris de las filas impares para un look más "fax/médico" */
-    --bs-table-accent-bg: transparent !important;
+[data-bs-theme="dark"] .medical-summary {
+    background-color: #1e1e1e;
+    border-color: #2d2d2d;
 }
 
-.printing-mode th,
-.printing-mode td {
-    /* Texto negro puro para legibilidad */
-    color: #000 !important;
-    border-color: #000 !important;
+/* Menú Superior y Footer */
+[data-bs-theme="dark"] .navbar,
+[data-bs-theme="dark"] footer,
+[data-bs-theme="dark"] .footer {
+    background-color: #1e1e1e !important;
+    border-color: #2d2d2d !important;
 }
 
-.printing-mode .no-print {
-    display: none !important;
+[data-bs-theme="dark"] .navbar .navbar-brand,
+[data-bs-theme="dark"] .navbar .nav-link,
+[data-bs-theme="dark"] .navbar .navbar-text,
+[data-bs-theme="dark"] footer,
+[data-bs-theme="dark"] footer a:not(:hover),
+[data-bs-theme="dark"] footer i:not(:hover) {
+    color: #adb5bd !important;
 }
 
-.printing-mode .printing-footer {
-    display: block !important; /* Mostrar pie de página solo en PDF */
+[data-bs-theme="dark"] .navbar .nav-link:hover { color: #ffffff !important; }
+
+/* Tablas Genéricas (Como .report-table) */
+[data-bs-theme="dark"] .table { color: #e9ecef; }
+[data-bs-theme="dark"] .table td,
+[data-bs-theme="dark"] .table th {
+    background-color: transparent !important;
+    border-bottom-color: #2d2d2d;
 }
+[data-bs-theme="dark"] .report-table thead th { color: #adb5bd; border-bottom-color: #3d3d3d; }
+
+/* Scrollbar Global */
+[data-bs-theme="dark"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+[data-bs-theme="dark"] ::-webkit-scrollbar-track { background: #121212; }
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb { background-color: #404040; border-radius: 4px; border: 2px solid #121212; }
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover { background-color: #555; }
+
+

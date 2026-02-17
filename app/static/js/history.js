@@ -74,26 +74,56 @@ function generateMedicalPDF() {
 
     if (!element) return;
 
+    // --- 1. GUARDAR TEMA ACTUAL Y FORZAR MODO CLARO ---
+    const htmlEl = document.documentElement;
+    const currentTheme = htmlEl.getAttribute('data-bs-theme');
+    htmlEl.setAttribute('data-bs-theme', 'light');
+
+    // --- 2. PREPARAR ELEMENTOS VISUALES ---
+    element.classList.add('printing-mode');
+
+    // Ocultar manualmente los botones de edición/borrar para asegurar que no salgan
+    const noPrintElements = element.querySelectorAll('.no-print');
+    noPrintElements.forEach(el => el.style.display = 'none');
+
+    // Mostrar el mensaje de pie de página ("Reporte generado automáticamente...")
+    const printFooter = element.querySelector('.printing-footer');
+    if (printFooter) printFooter.style.display = 'block';
+
+    // --- 3. CONFIGURACIÓN DEL PDF ---
     const opt = {
-        margin:       [10, 10, 10, 10],
+        margin:       [15, 10, 15, 10], // Margen un poco más grande abajo para el footer
         filename:     `Reporte_Clinico_${userName}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  {
             scale: 2,
             useCORS: true,
             logging: false,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+
         },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Añadir clase para estilos de impresión
-    element.classList.add('printing-mode');
-
+    // --- 4. GENERAR PDF Y RESTAURAR ---
     html2pdf().set(opt).from(element).save().then(() => {
+        // Restaurar el tema oscuro (si estaba activado)
+        if (currentTheme) {
+            htmlEl.setAttribute('data-bs-theme', currentTheme);
+        }
+
+        // Restaurar la vista normal
         element.classList.remove('printing-mode');
+        noPrintElements.forEach(el => el.style.display = '');
+        if (printFooter) printFooter.style.display = 'none';
+
     }).catch(err => {
         console.error("Error generando PDF:", err);
+
+        // Restaurar todo también en caso de que falle la generación
+        if (currentTheme) htmlEl.setAttribute('data-bs-theme', currentTheme);
         element.classList.remove('printing-mode');
+        noPrintElements.forEach(el => el.style.display = '');
+        if (printFooter) printFooter.style.display = 'none';
     });
 }

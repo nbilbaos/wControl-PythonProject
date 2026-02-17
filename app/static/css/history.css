@@ -7,30 +7,55 @@
     letter-spacing: 1px;
     color: #6c757d;
 }
-
 /* =========================================
-   MODO IMPRESIÓN (PDF)
+   4. MODO IMPRESIÓN (PDF) Y EXPORTACIÓN
    ========================================= */
-/* Esta clase se agrega vía JS antes de generar el PDF */
+@media print {
+    /* 1. Forzar variables de Bootstrap a modo claro */
+    html, html[data-bs-theme="dark"] {
+        --bs-body-bg: #ffffff !important;
+        --bs-body-color: #000000 !important;
+    }
 
-.printing-mode {
-    box-shadow: none !important;
-    border: none !important;
-    padding: 0 !important;
-}
+    /* 2. Sobreescribir forzosamente nuestros propios estilos oscuros */
+    [data-bs-theme="dark"] body,
+    [data-bs-theme="dark"] .card,
+    [data-bs-theme="dark"] .medical-summary,
+    .printing-mode,
+    .printing-mode .medical-summary {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
 
-/* Ocultar elementos marcados como no-print (Botones de acción) */
-.printing-mode .no-print {
-    display: none !important;
-}
+    /* 3. Limpiar las Tablas para que parezcan documentos médicos */
+    [data-bs-theme="dark"] .table,
+    [data-bs-theme="dark"] .table th,
+    [data-bs-theme="dark"] .table td,
+    [data-bs-theme="dark"] .report-table thead th {
+        background-color: transparent !important;
+        color: #000000 !important;
+        border-bottom-color: #cccccc !important;
+    }
 
-/* Ocultar la última columna de la tabla (donde estaban los botones) */
-.printing-mode th:last-child,
-.printing-mode td:last-child {
-    display: none !important;
-}
+    /* 4. Textos rebeldes (Rescatar lo que quedó blanco o gris) */
+    [data-bs-theme="dark"] .text-white,
+    [data-bs-theme="dark"] .text-light,
+    [data-bs-theme="dark"] .text-muted,
+    [data-bs-theme="dark"] h1, h2, h3, h4, h5, h6 {
+        color: #000000 !important;
+    }
 
-/* Ajustes de tipografía para impresión */
-.printing-mode h3 {
-    color: #000 !important; /* Asegurar negro puro */
+    /* 5. Mantener SÓLO los colores de las flechas (Verde/Rojo) */
+    .text-success { color: #198754 !important; }
+    .text-danger { color: #dc3545 !important; }
+
+    /* 6. Asegurar que los colores exactos se impriman (Ignorar ahorro de tinta del navegador) */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .no-print { display: none !important; }
 }

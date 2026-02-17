@@ -175,3 +175,84 @@
 .btn-fab:hover i {
     transform: rotate(90deg); /* El signo + gira al pasar el mouse */
 }
+/* --- ADAPTACIÓN MODO OSCURO (DASHBOARD) --- */
+
+[data-bs-theme="dark"] .pbi-card {
+    background-color: #1e1e1e;
+    border: 1px solid #2d2d2d;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+[data-bs-theme="dark"] .pbi-header,
+[data-bs-theme="dark"] .kpi-value,
+[data-bs-theme="dark"] .fw-bold {
+    color: #f8f9fa !important;
+}
+
+/* --- CORRECCIONES NUEVAS --- */
+
+/* 1. Arreglar Tabla y Encabezados rebeldes */
+[data-bs-theme="dark"] .bg-white {
+    background-color: #1e1e1e !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+    background-color: #2a2a2a !important;
+    color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .table {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] .table td,
+[data-bs-theme="dark"] .table th {
+    background-color: transparent !important; /* Deja ver el fondo oscuro de la tarjeta */
+    border-bottom-color: #2d2d2d;
+}
+
+[data-bs-theme="dark"] .table-pbi thead th {
+    box-shadow: 0 1px 0 #2d2d2d;
+}
+
+
+/* 3. Medallas */
+[data-bs-theme="dark"] .achievement-mini {
+    background: #2d2d2d;
+    /* NUEVO: Un borde sutil para definir el espacio vacío */
+    border: 1px dashed #444;
+    opacity: 0.5; /* Un poco más transparente si no está activo */
+}
+
+[data-bs-theme="dark"] .achievement-mini.active {
+    background: #1e1e1e;
+    border: 1px solid #3d3d3d; /* Borde sólido si está activo */
+    opacity: 1;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2); /* Pequeña sombra para que resalte */
+}
+/* --- SCROLLBAR PERSONALIZADO MODO OSCURO --- */
+[data-bs-theme="dark"] ::-webkit-scrollbar {
+    width: 8px; /* Más delgada */
+    height: 8px;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-track {
+    background: #1e1e1e; /* Color del fondo de la tarjeta */
+    border-radius: 4px;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+    background-color: #404040; /* Color gris oscuro para la barra */
+    border-radius: 4px;
+    border: 2px solid #1e1e1e; /* Borde para dar efecto de profundidad */
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Un poco más claro al pasar el mouse */
+}
+
+/* --- PUNTERO DEL IMC (Inmune al modo oscuro) --- */
+.bmi-pointer {
+    background-color: #ffffff !important;
+    border-color: #212529 !important; /* Borde oscuro para que resalte */
+}
