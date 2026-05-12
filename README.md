@@ -22,4 +22,5 @@
 4. Ejecuta la aplicación: `python app.py`
 
 ## 📊 Propósito del Proyecto
+
 Este sistema forma parte de un conjunto de herramientas tecnológicas orientadas a la gestión eficiente y la formulación de proyectos, integrando análisis de datos y soluciones de software modernas.
